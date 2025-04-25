@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GadgetZone - Главная</title>
+    <link rel="stylesheet" href="/GadgetZone/src/main/resources/static/css/style.css">
+    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="/GadgetZone/src/main/resources/templates/index.html" class="logo">
+                <img src="/GadgetZone/src/main/resources/static/images/logo.jpg" alt="Логотип GadgetZone">
+            </a>
+            
+            <div class="nav-search">
+                <input type="text" placeholder="Поиск товаров..." class="search-input">
+                <button class="search-button">Найти</button>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/profile" class="nav-link">Профиль</a></li>
+                <li><a href="/orders" class="nav-link">Заказы</a></li>
+                <li><a href="/wishlist" class="nav-link">Избранное</a></li>
+                <li>
+                    <a href="/cart" class="nav-link cart-link">
+                        Корзина
+                        <span class="cart-count" th:text="${cartCount}">0</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="product-grid">
+            <div class="product-card" th:each="product : ${products}">
+                <img th:src="@{'/images/products/' + ${product.image}}" 
+                    alt="Изображение товара" 
+                    class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title" th:text="${product.name}"></h3>
+                    <p class="product-price" th:text="${#numbers.formatDecimal(product.price, 1, 2, 'COMMA') + ' ₽'}"></p>
+                    <div class="product-actions">
+                        <button class="buy-button" 
+                                th:data-product-id="${product.id}"
+                                onclick="addToCart(this)">
+                            В корзину
+                        </button>
+                        <button class="wishlist-button"
+                                th:data-product-id="${product.id}"
+                                onclick="addToWishlist(this)">
+                            ♡
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

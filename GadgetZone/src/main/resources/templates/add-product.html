@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить товар</title>
+</head>
+<body>
+    <div th:if="${error}" style="color: red;">
+        <span th:text="${error}"></span>
+    </div>
+
+    <form th:action="@{/seller/products/add}" th:object="${product}" method="post">
+        <input type="text" th:field="*{name}" placeholder="Название">
+        <div th:if="${#fields.hasErrors('name')}" style="color: red;">
+            <span th:errors="*{name}"></span>
+        </div>
+
+        <textarea th:field="*{description}" placeholder="Описание"></textarea>
+
+        <input type="number" th:field="*{price}" step="0.01" placeholder="Цена">
+        <div th:if="${#fields.hasErrors('price')}" style="color: red;">
+            <span th:errors="*{price}"></span>
+        </div>
+
+        <input type="number" th:field="*{stock}" placeholder="Количество">
+        <div th:if="${#fields.hasErrors('stock')}" style="color: red;">
+            <span th:errors="*{stock}"></span>
+        </div>
+
+        <button type="submit">Добавить</button>
+    </form>
+</body>
+</html>

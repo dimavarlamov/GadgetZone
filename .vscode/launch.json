@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-GadgetZoneApplication<GadgetZone>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.GadgetZone.GadgetZoneApplication",
+            "projectName": "GadgetZone",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
