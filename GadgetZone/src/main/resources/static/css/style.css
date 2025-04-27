@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #6d1cd0;
-    --secondary-color: #9437eb;
+    --primary-color: rgb(67, 0, 78);
+    --secondary-color: #543958;
     --text-color: #333;
     --bg-color: #f5f5f5;
     --border-radius: 8px;
@@ -20,7 +20,7 @@ body {
     line-height: 1.6;
 }
 
-/* Шапка */
+
 .header {
     background-color: var(--primary-color);
     padding: 1rem 0;
