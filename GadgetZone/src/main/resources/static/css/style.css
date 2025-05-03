@@ -121,3 +121,94 @@ img {
     height: auto;
     vertical-align: middle;
 }
+
+.error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Стили для формы регистрации */
+.user-form {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.user-form table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-form td {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+}
+
+.user-form input[type="text"],
+.user-form input[type="password"],
+.user-form input[type="email"] {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.user-form button {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.user-form button:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Стили для карточек товара */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.product-card {
+    width: 220px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    background-color: white;
+}
+
+.product-img {
+    max-width: 100%;
+    height: 160px;
+    object-fit: contain;
+    margin-bottom: 12px;
+}
+
+.price {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    background-color: #00ac00;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}

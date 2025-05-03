@@ -2,7 +2,6 @@ package com.GadgetZone.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority; 
@@ -28,7 +27,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean save(UserDTO userDTO) {
-        // Валидация по ТЗ
         if (userDTO.getPassword().length() < 8) {
             throw new IllegalArgumentException("Пароль должен содержать минимум 8 символов");
         }
@@ -41,8 +39,8 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(userDTO.getPassword()))
                 .email(userDTO.getEmail())
                 .name(userDTO.getName())
-                .role(Role.CLIENT) // По умолчанию клиент
-                .balance(1000.00) // Бонусные рубли по ТЗ
+                .role(Role.CLIENT) 
+                .balance(1000.00) 
                 .build();
         
         return userRepository.save(user);

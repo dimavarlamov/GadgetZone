@@ -10,8 +10,9 @@
 <body>
     <header class="header">
         <nav class="nav">
-            <a href="/GadgetZone/src/main/resources/templates/index.html" class="logo">
-                <img src="/GadgetZone/src/main/resources/static/images/logo.jpg" alt="Логотип GadgetZone">
+            <a href="/" class="logo">
+                <!-- <img src="/GadgetZone/src/main/resources/static/images/logo.jpg" alt="Логотип GadgetZone"> -->
+                <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img">
             </a>
             
             <div class="nav-search">
@@ -33,30 +34,15 @@
         </nav>
     </header>
 
-    <main class="main-content">
+    <main>
         <div class="product-grid">
-            <div class="product-card" th:each="product : ${products}">
-                <img th:src="@{'/images/products/' + ${product.image}}" 
-                    alt="Изображение товара" 
-                    class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title" th:text="${product.name}"></h3>
-                    <p class="product-price" th:text="${#numbers.formatDecimal(product.price, 1, 2, 'COMMA') + ' ₽'}"></p>
-                    <div class="product-actions">
-                        <button class="buy-button" 
-                                th:data-product-id="${product.id}"
-                                onclick="addToCart(this)">
-                            В корзину
-                        </button>
-                        <button class="wishlist-button"
-                                th:data-product-id="${product.id}"
-                                onclick="addToWishlist(this)">
-                            ♡
-                        </button>
-                    </div>
-                </div>
+            <div th:each="product : ${products}" class="product-card">
+                <img th:src="@{${product.imageUrl}}" alt="Товар" class="product-img">
+                <h3 th:text="${product.name}"></h3>
+                <p class="price" th:text="${'Цена: ' + product.price + ' ₽'}"></p>
+                <button class="btn">Купить</button>
             </div>
-        </div>
+        </div>    
     </main>
 
     <script th:src="@{/js/main.js}"></script>

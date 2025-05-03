@@ -1,31 +1,76 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login page</title>
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="/GadgetZone/src/main/resources/static/css/style.css"> 
 </head>
 <body>
+    <h1>Регистрация</h1>
+
+    <div th:if="${#fields.hasAnyErrors()}" class="error">
+        <span th:text="${#strings.listJoin(#fields.errors('global'), ', ')}"></span>
+    </div>
+
     <form th:action="@{/user/new}" th:object="${user}" method="post">
         <table border="1">
             <tr>
-                <td>Name</td>
-                <td><input type="text" th:field="*{username}"></td>
+                <td>Имя:</td>
+                <td>
+                    <input type="text" 
+                        th:field="*{username}" 
+                        required 
+                        pattern="[A-Za-zА-Яа-я]{2,}"
+                        placeholder="Введите имя">
+                    <div th:if="${#fields.hasErrors('username')}" class="error">
+                        Имя должно содержать минимум 2 буквы.
+                    </div>
+                </td>
             </tr>
+
             <tr>
-                <td>Password</td>
-                <td><input type="password" th:field="*{password}"></td>
+                <td>Пароль:</td>
+                <td>
+                    <input type="password" 
+                        th:field="*{password}" 
+                        required 
+                        minlength="8"
+                        placeholder="Не менее 8 символов">
+                    <div th:if="${#fields.hasErrors('password')}" class="error">
+                        Пароль должен быть не короче 8 символов.
+                    </div>
+                </td>
             </tr>
+
             <tr>
-                <td>MatchingPassword</td>
-                <td><input type="password" th:field="*{matchingPassword}"></td>
+                <td>Подтвердите пароль:</td>
+                <td>
+                    <input type="password" 
+                        th:field="*{matchingPassword}" 
+                        required
+                        placeholder="Повторите пароль">
+                    <div th:if="${#fields.hasErrors('matchingPassword')}" class="error">
+                        Пароли не совпадают.
+                    </div>
+                </td>
             </tr>
+
             <tr>
-                <td>Email</td>
-                <td><input type="email" th:field="*{email}"></td>
+                <td>Email:</td>
+                <td>
+                    <input type="email" 
+                        th:field="*{email}" 
+                        required
+                        placeholder="example@mail.com">
+                    <div th:if="${#fields.hasErrors('email')}" class="error">
+                        Введите корректный email.
+                    </div>
+                </td>
             </tr>
         </table>
-        <button type="submit">Save</button>
+
+        <button type="submit">Зарегистрироваться</button>
     </form>
 </body>
 </html>

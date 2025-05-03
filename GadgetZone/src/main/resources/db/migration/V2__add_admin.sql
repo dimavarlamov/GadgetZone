@@ -1,4 +1,9 @@
-INSERT INTO users (id, username, password, email, name, role)
-VALUES (1, 'admin', '$2a$10$XlQY6W7U3bZkKj4p8z6n3uJd7rV2mW1oGt0YhLq9sBvNcRtPfKlS', 'admin@mail.ru', 'Admin', 'ADMIN');
-
-ALTER SEQUENCE user_seq RESTART WITH 2;
+INSERT INTO `users` (`name`, `email`, `password_hash`, `role`, `balance`)
+VALUES (
+    'Администратор', 
+    'admin@gmail.com', 
+    '$2a$12$4VWr5o7c6XZ5qy1gD7zR0e.9nTd0jKb1Lk8mZf3vYhGJpNlQ2sS3u', 
+    'ADMIN', 
+    0.00
+)
+ON DUPLICATE KEY UPDATE email = email; 

@@ -2,6 +2,9 @@ package com.GadgetZone.controllers;
 
 import com.GadgetZone.domain.Product;
 import com.GadgetZone.service.ProductService;
+
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,9 +26,7 @@ public class ProductController {
     }
 
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute("product") Product product, 
-                            BindingResult bindingResult, 
-                            Model model) {
+    public String addProduct(@ModelAttribute("product") Product product, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             return "add-product";
         }
@@ -36,5 +37,12 @@ public class ProductController {
             model.addAttribute("error", e.getMessage());
             return "add-product";
         }
+    }
+
+    @GetMapping
+    public String getAllProducts(Model model) {
+        List<Product> products = productService.getAllProducts();
+        model.addAttribute("products", products);
+        return "products";
     }
 }

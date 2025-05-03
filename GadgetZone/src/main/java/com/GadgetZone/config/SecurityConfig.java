@@ -41,12 +41,13 @@ public class SecurityConfig {
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/css/**", 
-                "/js/**", 
-                "/images/**", 
-                "/webjars/**"
-            ).permitAll()
+        .requestMatchers(
+            "/", 
+            "/css/**", 
+            "/js/**", 
+            "/images/**", 
+            "/products"
+        ).permitAll()
             
             .requestMatchers("/admin/**").hasAuthority("ADMIN")
             .requestMatchers("/seller/**").hasAuthority("SELLER")
