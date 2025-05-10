@@ -38,11 +38,4 @@ public class ProductController {
             return "add-product";
         }
     }
-
-    @GetMapping
-    public String getAllProducts(Model model) {
-        List<Product> products = productService.getAllProducts();
-        model.addAttribute("products", products);
-        return "products";
-    }
 }

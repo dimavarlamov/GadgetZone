@@ -10,7 +10,7 @@ import com.GadgetZone.domain.Product;
 import com.GadgetZone.service.ProductService;
 
 @Controller
-public class MainController {
+public class    MainController {
     private final ProductService productService;
 
     public MainController(ProductService productService) {

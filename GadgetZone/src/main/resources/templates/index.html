@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GadgetZone - Главная</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
     <header class="header">
         <nav class="nav">
             <a href="/" class="logo">
-                <!-- <img src="/GadgetZone/src/main/resources/static/images/logo.jpg" alt="Логотип GadgetZone"> -->
+<!--                 <img src="/GadgetZone/src/main/resources/static/images/logo.jpg" alt="Логотип GadgetZone">-->
                 <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img">
             </a>
             
@@ -37,7 +37,7 @@
     <main>
         <div class="product-grid">
             <div th:each="product : ${products}" class="product-card">
-                <img th:src="@{${product.imageUrl}}" alt="Товар" class="product-img">
+                <img th:src="@{'/images/' + ${product.imageUrl}}" alt="Товар" class="product-img">
                 <h3 th:text="${product.name}"></h3>
                 <p class="price" th:text="${'Цена: ' + product.price + ' ₽'}"></p>
                 <button class="btn">Купить</button>
