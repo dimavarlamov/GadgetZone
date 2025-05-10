@@ -34,7 +34,8 @@ public class ProductRepository {
                 rs.getDouble("price"),
                 rs.getInt("stock"),
                 rs.getInt("category_id"),
-                rs.getInt("seller_id")
+                rs.getInt("seller_id"),
+                rs.getString("image_url")
                 )
             );
     }

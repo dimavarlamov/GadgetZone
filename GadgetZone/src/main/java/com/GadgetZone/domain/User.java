@@ -7,9 +7,13 @@ import jakarta.validation.constraints.*;
 
 @Data
 @Builder
+@Entity 
+@Table(name = "users") 
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    
+
     @NotBlank(message = "Имя обязательно")
     @Pattern(regexp = "^[A-Za-zА-Яа-я]{2,}$", message = "Имя должно содержать минимум 2 буквы")
     private String username;
@@ -26,7 +30,9 @@ public class User {
     @NotBlank(message = "Email обязателен")
     private String email;
 
+    @Enumerated(EnumType.STRING)
     private Role role;
+
     private double balance;
     private String name;
 }

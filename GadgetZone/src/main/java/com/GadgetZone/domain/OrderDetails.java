@@ -1,24 +1,19 @@
 package com.GadgetZone.domain;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EntityScan
+@Entity
 @Table(name = "orders_details")
 public class OrderDetails {
     private static final String SEQ_NAME = "order_details_seq";

@@ -1,6 +1,7 @@
 package com.GadgetZone.domain;
 
-import lombok.AllArgsConstructor;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +9,9 @@ import jakarta.validation.constraints.*;
 
 @Data
 @Builder
-@NoArgsConstructor 
-@AllArgsConstructor 
+@NoArgsConstructor
+@Entity
+@Table(name = "products")
 public class Product {
     private int id;
 
@@ -28,7 +30,7 @@ public class Product {
     private int sellerId;
     private String imageUrl;
 
-    public Product(int id, String name, String description, double price, int stock, int categoryId, int sellerId) {
+    public Product(int id, String name, String description, double price, int stock, int categoryId, int sellerId, String imageUrl) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -36,5 +38,6 @@ public class Product {
         this.stock = stock;
         this.categoryId = categoryId;
         this.sellerId = sellerId;
+        this.imageUrl = imageUrl;
     }
 }
