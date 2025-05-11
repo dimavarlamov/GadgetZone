@@ -1,33 +1,64 @@
 package com.GadgetZone.domain;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@EntityScan
-@Entity
-@Table(name = "orders_details")
 public class OrderDetails {
-    private static final String SEQ_NAME = "order_details_seq";
+    private Long id;  // Идентификатор записи
+    private Long orderId;  // Идентификатор заказа
+    private Long productId;  // Идентификатор товара
+    private BigDecimal amount;  // Количество товара в заказе
+    private BigDecimal price;  // Цена товара на момент оформления заказа
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQ_NAME)
-    @SequenceGenerator(name = SEQ_NAME, sequenceName = SEQ_NAME, allocationSize = 1)
-    private Long id;
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
-    @ManyToOne 
-    @JoinColumn(name = "product_id")
-    private Product product;
-    private BigDecimal amount;
-    private BigDecimal price;
+    // Конструктор без параметров (по необходимости)
+    public OrderDetails() {}
+
+    // Конструктор с параметрами
+    public OrderDetails(Long orderId, Long productId, BigDecimal amount, BigDecimal price) {
+        this.orderId = orderId;
+        this.productId = productId;
+        this.amount = amount;
+        this.price = price;
+    }
+
+    // Геттеры и сеттеры для всех полей
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 }

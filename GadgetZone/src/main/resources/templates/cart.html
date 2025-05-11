@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Корзина</title>
+</head>
+<body>
+<h1>Ваша корзина</h1>
+
+<!-- Если корзина пуста -->
+<div th:if="${cartItems.isEmpty()}">
+  <p>Ваша корзина пуста.</p>
+</div>
+
+<!-- Таблица с товарами в корзине -->
+<table th:unless="${cartItems.isEmpty()}">
+  <tr>
+    <th>Название</th>
+    <th>Цена</th>
+    <th>Количество</th>
+    <th>Сумма</th>
+    <th>Действия</th>
+  </tr>
+  <tr th:each="product : ${cartItems}">
+    <td th:text="${product.name}">Название</td>
+    <td th:text="${product.price}">Цена</td>
+    <td th:text="${quantities[product.id]}">Количество</td>
+    <td th:text="${product.price * quantities[product.id]}">Сумма</td>
+    <td>
+      <a th:href="@{'/cart/remove/' + ${product.id}}">Удалить</a>
+    </td>
+  </tr>
+</table>
+
+<!-- Вывод итоговой стоимости -->
+<p>Итого: <span th:text="${total}">0.0</span></p>
+
+<!-- Кнопка для очистки корзины -->
+<a href="/cart/clear">Очистить корзину</a>
+
+<!-- Кнопка для оформления заказа -->
+<a href="/cart/checkout">Оформить заказ</a>
+
+</body>
+</html>
