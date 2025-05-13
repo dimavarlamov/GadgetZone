@@ -21,15 +21,15 @@ public class OrderService {
         // Вычисляем сумму заказа
         BigDecimal totalSum = calculateTotalSum(details);
 
-        // Создаём заказ
+        // Создаём объект заказа
         Order order = new Order(userId, totalSum, address, null, null, "PENDING");
 
-        // Сохраняем заказ в базе данных
+        // Сохраняем заказ (в таблицу orders)
         orderDAO.addOrder(order);
 
-        // Добавляем детали заказа
+        // Устанавливаем ID заказа в каждый OrderDetails и сохраняем
         for (OrderDetails orderDetails : details) {
-            orderDetails.setOrderId(order.getId());  // Устанавливаем id заказа в детали
+            orderDetails.setOrderId(order.getId());
             orderDAO.addOrderDetails(orderDetails);
         }
 
@@ -37,7 +37,7 @@ public class OrderService {
     }
 
     public Order getOrderById(Long orderId) {
-        return orderDAO.getOrderById(orderId);
+        return orderDAO.getOrderById(orderId);  // тут автоматически подтягиваются details + product
     }
 
     public List<Order> getAllOrders() {

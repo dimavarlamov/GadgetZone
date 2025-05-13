@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Подтверждение заказа</title>
+  <title>Заказ оформлен</title>
 </head>
 <body>
-<h1>Спасибо за ваш заказ!</h1>
-<p>Ваш заказ успешно оформлен. Мы свяжемся с вами для подтверждения.</p>
-<p>Номер заказа: <span th:text="${order.id}">12345</span></p>
-<a href="/">Перейти на главную</a>
+<h2>Спасибо за заказ!</h2>
+
+<p>Ваш заказ успешно оформлен. Мы свяжемся с вами по адресу:</p>
+<p><strong th:text="${order.address}">[Адрес доставки]</strong></p>
+
+<p>Сумма заказа: <strong th:text="${order.sum}">0.00</strong> ₽</p>
+
+<a th:href="@{/}">← Вернуться на главную</a>
 </body>
 </html>

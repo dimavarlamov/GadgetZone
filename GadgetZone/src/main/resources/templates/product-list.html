@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Товары продавца</title>
+  <meta charset="UTF-8"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+</head>
+<body>
+<h1>Мои товары</h1>
+
+<a href="/seller/products/add">➕ Добавить товар</a>
+
+<table border="1">
+  <thead>
+  <tr>
+    <th>Название</th>
+    <th>Описание</th>
+    <th>Цена</th>
+    <th>Количество</th>
+    <th>Изображение</th>
+    <th>Действия</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="product : ${products}">
+    <td th:text="${product.name}"></td>
+    <td th:text="${product.description}"></td>
+    <td th:text="${product.price} + ' ₽'"></td>
+    <td th:text="${product.stock}"></td>
+    <td><img th:src="${product.imageUrl}" alt="image" width="80"/></td>
+    <td>
+      <a th:href="@{'/seller/products/edit/' + ${product.id}}">✏️ Редактировать</a><br/>
+      <a th:href="@{'/seller/products/delete/' + ${product.id}}"
+         onclick="return confirm('Удалить этот товар?')">🗑️ Удалить</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

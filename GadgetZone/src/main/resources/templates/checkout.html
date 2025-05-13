@@ -1,37 +1,24 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
   <meta charset="UTF-8">
   <title>Оформление заказа</title>
 </head>
 <body>
-<h1>Оформление заказа</h1>
+<h2>Оформление заказа</h2>
 
-<form action="/cart/checkout" method="post">
-  <div>
-    <label for="firstName">Имя:</label>
-    <input type="text" id="firstName" name="firstName" required>
-  </div>
+<!-- Форма оформления заказа -->
+<form th:action="@{/orders/checkout}" th:object="${order}" method="post">
+  <label for="address">Адрес доставки:</label>
+  <input type="text" id="address" th:field="*{address}" required placeholder="Введите адрес доставки">
+  <br><br>
 
-  <div>
-    <label for="lastName">Фамилия:</label>
-    <input type="text" id="lastName" name="lastName" required>
-  </div>
+  <p><strong>Сумма к оплате:</strong> <span th:text="${cart.total}">0.00</span> ₽</p>
 
-  <div>
-    <label for="address">Адрес доставки:</label>
-    <input type="text" id="address" name="address" required>
-  </div>
-
-  <div>
-    <label for="phone">Телефон:</label>
-    <input type="tel" id="phone" name="phone" required>
-  </div>
-
-  <div>
-    <button type="submit">Оформить заказ</button>
-  </div>
+  <button type="submit">Оформить заказ</button>
 </form>
 
+<br>
+<a th:href="@{/orders/cart}">← Вернуться в корзину</a>
 </body>
 </html>
