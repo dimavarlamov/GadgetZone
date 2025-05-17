@@ -81,4 +81,11 @@ public class OrderDAO {
                 rs.getString("status")
         ));
     }
+
+    public boolean isProductOrdered(int productId) {
+        String sql = "SELECT COUNT(*) FROM orders_details WHERE product_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, productId);
+        return count != null && count > 0;
+    }
+
 }

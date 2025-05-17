@@ -1,7 +1,7 @@
 package com.GadgetZone.service;
 
 import com.GadgetZone.dao.ProductRepository;
-import com.GadgetZone.dao.OrderRepository;
+import com.GadgetZone.dao.OrderDAO;
 import com.GadgetZone.domain.Product;
 
 import org.springframework.stereotype.Service;
@@ -13,11 +13,11 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final OrderRepository orderRepository;
+    private final OrderDAO orderDAO;
 
-    public ProductService(ProductRepository productRepository, OrderRepository orderRepository) {
+    public ProductService(ProductRepository productRepository, OrderDAO orderDAO) {
         this.productRepository = productRepository;
-        this.orderRepository = orderRepository;
+        this.orderDAO = orderDAO;
     }
 
     public List<Product> getAllProducts() {
@@ -30,15 +30,13 @@ public class ProductService {
     }
 
     public void updateProduct(Product product) {
-        if (product == null || product.getId() == null) {
+        if (product == null || product.getId() == 0) {
             throw new IllegalArgumentException("Неверный ID продукта.");
         }
 
-        Product existingProduct = productRepository.findById(product.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Товар не найден!"));
-
-        if (orderRepository.existsByProductId(product.getId())) {
-            throw new IllegalArgumentException("Этот товар уже был заказан. Редактирование ограничено!");
+        Product existingProduct = productRepository.findById(product.getId());
+        if (existingProduct == null) {
+            throw new IllegalArgumentException("Товар не найден!");
         }
 
         validateProduct(product);
@@ -55,25 +53,24 @@ public class ProductService {
     }
 
     public void deleteProduct(int id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Товар не найден!"));
-
-        if (orderRepository.existsByProductId(id)) {
-            throw new IllegalArgumentException("Невозможно удалить товар, так как он уже был заказан.");
+        Product product = productRepository.findById(id);
+        if (product == null) {
+            throw new IllegalArgumentException("Товар не найден!");
         }
 
-        productRepository.delete(product);
+
+        productRepository.delete(id);
     }
 
     public Product getProductById(int id) {
-        return productRepository.findById(id).orElse(null);
+        return productRepository.findById(id);
     }
 
     private void validateProduct(Product product) {
         if (product.getName() == null || product.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Название товара обязательно!");
         }
-        if (product.getPrice() == null || product.getPrice().doubleValue() <= 0) {
+        if (product.getPrice() <= 0) {
             throw new IllegalArgumentException("Цена должна быть больше нуля!");
         }
         if (product.getStock() < 0) {
@@ -81,6 +78,9 @@ public class ProductService {
         }
         if (product.getImageUrl() == null || product.getImageUrl().trim().isEmpty()) {
             throw new IllegalArgumentException("Ссылка на изображение обязательна!");
+        }
+        if (orderDAO.isProductOrdered(product.getId())) {
+            throw new IllegalArgumentException("Этот товар уже был заказан. Редактирование ограничено!");
         }
     }
 }
