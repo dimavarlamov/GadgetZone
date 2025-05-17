@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Информация о заказе</title>
+</head>
+<body>
+<h2>Заказ № <span th:text="${order.id}">[ID]</span></h2>
+
+<p><strong>Адрес доставки:</strong> <span th:text="${order.address}">[Адрес]</span></p>
+<p><strong>Статус:</strong> <span th:text="${order.status}">[Статус]</span></p>
+<p><strong>Сумма:</strong> <span th:text="${order.sum}">0.00</span> ₽</p>
+
+<h3>Товары:</h3>
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+  <tr>
+    <th>Название</th>
+    <th>Цена</th>
+    <th>Количество</th>
+    <th>Итого</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="item : ${order.details}">
+    <td th:text="${item.product.name}">[Название]</td>
+    <td th:text="${item.product.price}">0.00</td>
+    <td th:text="${item.quantity}">1</td>
+    <td th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 1, 'POINT', 2, 'NONE')}">0.00</td>
+  </tr>
+  </tbody>
+</table>
+
+<br>
+<a th:href="@{/}">← Вернуться на главную</a>
+</body>
+</html>

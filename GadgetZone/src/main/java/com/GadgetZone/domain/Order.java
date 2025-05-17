@@ -1,51 +1,95 @@
 package com.GadgetZone.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Entity
-@Table(name = "orders")
 public class Order {
-    private static final String SEQ_NAME = "order_seq";
+    private Long id;  // Идентификатор заказа
+    private Long userId;  // Идентификатор пользователя
+    private BigDecimal sum;  // Сумма заказа
+    private String address;  // Адрес доставки
+    private LocalDateTime created;  // Дата и время создания заказа
+    private LocalDateTime updated;  // Дата и время последнего обновления
+    private List<OrderDetails> details;  // Список товаров в заказе
+    private String status;  // Статус заказа (например, "PENDING", "COMPLETED")
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQ_NAME)
-    @SequenceGenerator(name = SEQ_NAME, sequenceName = SEQ_NAME, allocationSize = 1)
-    private Long id;
-    @CreationTimestamp
-    private LocalDateTime created;
-    @UpdateTimestamp
-    private LocalDateTime updated;
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-    private BigDecimal sum;
-    private String address;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderDetails> details;
-    @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    // Конструктор без параметров (по необходимости)
+    public Order() {}
+
+    // Конструктор с параметрами
+    public Order(Long userId, BigDecimal sum, String address, LocalDateTime created, LocalDateTime updated, String status) {
+        this.userId = userId;
+        this.sum = sum;
+        this.address = address;
+        this.created = created;
+        this.updated = updated;
+        this.status = status;
+    }
+
+    // Геттеры и сеттеры для всех полей
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public BigDecimal getSum() {
+        return sum;
+    }
+
+    public void setSum(BigDecimal sum) {
+        this.sum = sum;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public LocalDateTime getCreated() {
+        return created;
+    }
+
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
+    }
+
+    public LocalDateTime getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(LocalDateTime updated) {
+        this.updated = updated;
+    }
+
+    public List<OrderDetails> getDetails() {
+        return details;
+    }
+
+    public void setDetails(List<OrderDetails> details) {
+        this.details = details;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

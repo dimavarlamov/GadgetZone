@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Оформление заказа</title>
+</head>
+<body>
+<h2>Оформление заказа</h2>
+
+<!-- Форма оформления заказа -->
+<form th:action="@{/orders/checkout}" th:object="${order}" method="post">
+  <label for="address">Адрес доставки:</label>
+  <input type="text" id="address" th:field="*{address}" required placeholder="Введите адрес доставки">
+  <br><br>
+
+  <p><strong>Сумма к оплате:</strong> <span th:text="${cart.total}">0.00</span> ₽</p>
+
+  <button type="submit">Оформить заказ</button>
+</form>
+
+<br>
+<a th:href="@{/orders/cart}">← Вернуться в корзину</a>
+</body>
+</html>

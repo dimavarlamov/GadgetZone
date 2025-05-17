@@ -1,9 +1,5 @@
 package com.GadgetZone.domain;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
-
 @Data
 @Builder
 @NoArgsConstructor

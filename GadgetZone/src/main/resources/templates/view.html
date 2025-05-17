@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Просмотр заказа</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<h1>Информация о заказе</h1>
+
+<div>
+  <p><strong>ID заказа:</strong> <span th:text="${order.id}"></span></p>
+  <p><strong>Пользователь ID:</strong> <span th:text="${order.userId}"></span></p>
+  <p><strong>Сумма:</strong> <span th:text="${order.sum}"></span></p>
+  <p><strong>Адрес:</strong> <span th:text="${order.address}"></span></p>
+  <p><strong>Статус:</strong> <span th:text="${order.status}"></span></p>
+  <p><strong>Дата создания:</strong> <span th:text="${#temporals.format(order.created, 'dd.MM.yyyy HH:mm')}"></span></p>
+</div>
+
+<h2>Детали заказа</h2>
+
+<table border="1">
+  <thead>
+  <tr>
+    <th>Название</th>
+    <th>Цена</th>
+    <th>Количество</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="item : ${order.details}">
+    <td th:text="${item.product.name}">Название</td>
+    <td th:text="${item.price}">Цена</td>
+    <td th:text="${item.amount}">Кол-во</td>
+  </tr>
+  </tbody>
+</table>
+
+<a th:href="@{/orders}">← Назад к списку заказов</a>
+
+</body>
+</html>
