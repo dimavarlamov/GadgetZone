@@ -1,5 +1,10 @@
 package com.GadgetZone.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,17 +19,21 @@ public class Order {
     private List<OrderDetails> details;  // Список товаров в заказе
     private String status;  // Статус заказа (например, "PENDING", "COMPLETED")
 
-    // Конструктор без параметров (по необходимости)
     public Order() {}
 
-    // Конструктор с параметрами
-    public Order(Long userId, BigDecimal sum, String address, LocalDateTime created, LocalDateTime updated, String status) {
-        this.userId = userId;
-        this.sum = sum;
-        this.address = address;
-        this.created = created;
-        this.updated = updated;
-        this.status = status;
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class Order {
+        private Long id;
+        private Long userId;
+        private BigDecimal sum;
+        private String address;
+        private LocalDateTime created;
+        private LocalDateTime updated;
+        private List<OrderDetails> details;
+        private String status;
     }
 
     // Геттеры и сеттеры для всех полей

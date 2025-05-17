@@ -53,29 +53,32 @@ public class OrderController {
             return "redirect:/orders/cart";
         }
 
-        order.setUser(user);
+        // Заполнение полей заказа
+        order.setUserId((long) user.getId());
         order.setSum(cartService.calculateTotal(cart));
         order.setDetails(cartService.getOrderDetailsFromCart(cart));
-        order.setStatus(OrderStatus.PENDING);  // Новый заказ ожидает обработки
+        order.setStatus("PENDING");
 
-        orderService.createOrder(order);
+        // Сохранение заказа
+        orderService.createOrder(order.getUserId(), order.getAddress(), order.getDetails());
 
-        // Очистка корзины после оформления
+        // Очистка корзины
         cartService.clearCart(user);
 
+        // Отправка заказа в шаблон
         model.addAttribute("order", order);
-        return "order-confirmation"; // шаблон order-confirmation.html
+        return "order-confirmation";
     }
 
     // Просмотр заказа
     @GetMapping("/view/{orderId}")
     public String viewOrder(@PathVariable Long orderId, @AuthenticationPrincipal User user, Model model) {
         Order order = orderService.getOrderById(orderId);
-        if (order == null || !order.getUser().equals(user)) {
+        if (order == null || !order.getUserId().equals((long) user.getId())) {
             model.addAttribute("error", "Заказ не найден.");
             return "redirect:/orders";
         }
         model.addAttribute("order", order);
-        return "order-details"; // шаблон order-details.html
+        return "order-details";
     }
 }

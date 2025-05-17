@@ -28,9 +28,9 @@ public class ProductRepository {
         ));
     }
 
-    public Product findById(int id) {
+    public Product findById(long id) {
         String sql = "SELECT * FROM products WHERE id = ?";
-        List<Product> products = jdbc.query(sql, new Object[]{id}, (rs, rowNum) -> new Product(
+        return jdbc.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> new Product(
                 rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("description"),
@@ -40,8 +40,8 @@ public class ProductRepository {
                 rs.getInt("seller_id"),
                 rs.getString("image_url")
         ));
-        return products.isEmpty() ? null : products.get(0);
     }
+
 
     public void save(Product product) {
         if (product.getId() == 0) {
