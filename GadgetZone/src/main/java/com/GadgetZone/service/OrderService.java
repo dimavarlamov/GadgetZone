@@ -22,7 +22,9 @@ public class OrderService {
         BigDecimal totalSum = calculateTotalSum(details);
 
         // Создаём объект заказа
-        Order order = new Order(userId, totalSum, address, null, null, "PENDING");
+        Long id = null;
+        String status = "PENDING";
+        Order order = new Order(id, userId, totalSum, status, null, null, address);
 
         // Сохраняем заказ (в таблицу orders)
         orderDAO.addOrder(order);

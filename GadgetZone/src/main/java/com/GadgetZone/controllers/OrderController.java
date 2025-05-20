@@ -55,12 +55,12 @@ public class OrderController {
 
         // Заполнение полей заказа
         order.setUserId((long) user.getId());
-        order.setSum(cartService.calculateTotal(cart));
-        order.setDetails(cartService.getOrderDetailsFromCart(cart));
+        order.setTotalAmount(cartService.calculateTotal(cart));
+        order.setOrderDetails(cartService.getOrderDetailsFromCart(cart));
         order.setStatus("PENDING");
 
         // Сохранение заказа
-        orderService.createOrder(order.getUserId(), order.getAddress(), order.getDetails());
+        orderService.createOrder(order.getUserId(), order.getDeliveryAddress(), order.getOrderDetails());
 
         // Очистка корзины
         cartService.clearCart(user);

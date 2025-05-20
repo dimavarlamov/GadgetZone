@@ -1,42 +1,48 @@
 package com.GadgetZone.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Order {
-    private Long id;  // Идентификатор заказа
-    private Long userId;  // Идентификатор пользователя
-    private BigDecimal sum;  // Сумма заказа
-    private String address;  // Адрес доставки
-    private LocalDateTime created;  // Дата и время создания заказа
-    private LocalDateTime updated;  // Дата и время последнего обновления
-    private List<OrderDetails> details;  // Список товаров в заказе
-    private String status;  // Статус заказа (например, "PENDING", "COMPLETED")
+    private Long id;
+    private Long userId;
+    private BigDecimal totalAmount;
+    private String status;
+    private LocalDateTime orderDate;
+    private LocalDateTime deliveryDate;
+    private String deliveryAddress;
+    private List<OrderDetails> orderDetails;
 
-    public Order() {}
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class Order {
-        private Long id;
-        private Long userId;
-        private BigDecimal sum;
-        private String address;
-        private LocalDateTime created;
-        private LocalDateTime updated;
-        private List<OrderDetails> details;
-        private String status;
+    public Order() {
     }
 
-    // Геттеры и сеттеры для всех полей
+    public Order(Long id, Long userId, BigDecimal totalAmount, String status,
+                 LocalDateTime orderDate, LocalDateTime deliveryDate, List<OrderDetails> orderDetails,
+                 String deliveryAddress) {
+        this.id = id;
+        this.userId = userId;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.orderDate = orderDate;
+        this.deliveryDate = deliveryDate;
+        this.orderDetails = orderDetails;
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public Order(Long id, Long userId, BigDecimal totalAmount, String status,
+                 LocalDateTime orderDate, LocalDateTime deliveryDate, String deliveryAddress) {
+        this.id = id;
+        this.userId = userId;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.orderDate = orderDate;
+        this.deliveryDate = deliveryDate;
+        this.deliveryAddress = deliveryAddress;
+        this.orderDetails = new ArrayList<>(); // создаём пустой список
+    }
+
 
     public Long getId() {
         return id;
@@ -54,44 +60,12 @@ public class Order {
         this.userId = userId;
     }
 
-    public BigDecimal getSum() {
-        return sum;
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
     }
 
-    public void setSum(BigDecimal sum) {
-        this.sum = sum;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public LocalDateTime getCreated() {
-        return created;
-    }
-
-    public void setCreated(LocalDateTime created) {
-        this.created = created;
-    }
-
-    public LocalDateTime getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(LocalDateTime updated) {
-        this.updated = updated;
-    }
-
-    public List<OrderDetails> getDetails() {
-        return details;
-    }
-
-    public void setDetails(List<OrderDetails> details) {
-        this.details = details;
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public String getStatus() {
@@ -100,5 +74,37 @@ public class Order {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public LocalDateTime getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(LocalDateTime deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public List<OrderDetails> getOrderDetails() {
+        return orderDetails;
+    }
+
+    public void setOrderDetails(List<OrderDetails> orderDetails) {
+        this.orderDetails = orderDetails;
     }
 }

@@ -20,7 +20,7 @@ public class OrderDAO {
 
     public void addOrder(Order order) {
         String sql = "INSERT INTO orders (user_id, sum, address, status) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, order.getUserId(), order.getSum(), order.getAddress(), order.getStatus());
+        jdbcTemplate.update(sql, order.getUserId(), order.getTotalAmount(), order.getDeliveryAddress(), order.getStatus());
     }
 
     public void addOrderDetails(OrderDetails orderDetails) {
@@ -46,7 +46,7 @@ public class OrderDAO {
 
         // Подгружаем детали заказа вместе с Product
         List<OrderDetails> details = getOrderDetailsByOrderId(orderId);
-        order.setDetails(details);
+        order.setOrderDetails(details);
 
         return order;
     }
