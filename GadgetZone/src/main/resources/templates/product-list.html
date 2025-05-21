@@ -1,16 +1,59 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Товары продавца</title>
+  <title>Мои товары</title>
   <meta charset="UTF-8"/>
   <link rel="stylesheet" href="/css/styles.css"/>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f4f4f4;
+    }
+    h1 {
+        color: #333;
+    }
+    a.button {
+        padding: 8px 16px;
+        background-color: #4CAF50;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+    }
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ccc;
+    }
+    th {
+        background-color: #f0f0f0;
+    }
+    img {
+        border-radius: 4px;
+    }
+    form {
+        display: inline;
+    }
+    .action-buttons a, .action-buttons button {
+        margin-top: 5px;
+        display: inline-block;
+    }
+  </style>
 </head>
 <body>
+
 <h1>Мои товары</h1>
 
-<a href="/seller/products/add">➕ Добавить товар</a>
+<a href="/seller/products/add" class="button">➕ Добавить товар</a>
 
-<table border="1">
+<br/><br/>
+
+<table>
   <thead>
   <tr>
     <th>Название</th>
@@ -28,13 +71,18 @@
     <td th:text="${product.price} + ' ₽'"></td>
     <td th:text="${product.stock}"></td>
     <td><img th:src="${product.imageUrl}" alt="image" width="80"/></td>
-    <td>
+    <td class="action-buttons">
       <a th:href="@{'/seller/products/edit/' + ${product.id}}">✏️ Редактировать</a><br/>
       <a th:href="@{'/seller/products/delete/' + ${product.id}}"
-         onclick="return confirm('Удалить этот товар?')">🗑️ Удалить</a>
+         onclick="return confirm('Удалить этот товар?')">🗑️ Удалить</a><br/>
+      <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
+        <input type="hidden" name="quantity" value="1"/>
+        <button type="submit" style="background-color:#2196F3; color:white; border:none; padding:6px 12px; border-radius:4px;">🛒 В корзину</button>
+      </form>
     </td>
   </tr>
   </tbody>
 </table>
+
 </body>
 </html>

@@ -1,38 +1,37 @@
 package com.GadgetZone.domain;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "products")
 public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @NotBlank(message = "Название товара обязательно!")
     private String name;
-
     private String description;
-
-    @DecimalMin(value = "0.01", message = "Цена должна быть больше нуля!")
     private double price;
-
-    @Min(value = 0, message = "Количество не может быть отрицательным!")
     private int stock;
-
     private int categoryId;
     private int sellerId;
     private String imageUrl;
+
+    // Геттеры и сеттеры
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
+
+    public int getCategoryId() { return categoryId; }
+    public void setCategoryId(int categoryId) { this.categoryId = categoryId; }
+
+    public int getSellerId() { return sellerId; }
+    public void setSellerId(int sellerId) { this.sellerId = sellerId; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

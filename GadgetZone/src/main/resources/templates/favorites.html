@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Избранное</title>
+  <link rel="stylesheet" href="/static/styles.css"> <!-- если есть CSS -->
+</head>
+<body>
+<h2>Мои избранные товары</h2>
+
+<div class="favorites-list">
+  <div th:if="${favorites.isEmpty()}">
+    <p>У вас пока нет избранных товаров.</p>
+  </div>
+
+  <div th:each="product : ${favorites}" class="product-card">
+    <h3 th:text="${product.name}">Название</h3>
+    <p th:text="${product.description}">Описание</p>
+    <p>Цена: <span th:text="${product.price}">0</span> руб.</p>
+
+    <form th:action="@{/favorites/toggle}" method="post">
+      <input type="hidden" name="productId" th:value="${product.id}" />
+      <button type="submit">Удалить из избранного</button>
+    </form>
+  </div>
+</div>
+
+<a href="/products">← Назад к товарам</a>
+</body>
+</html>

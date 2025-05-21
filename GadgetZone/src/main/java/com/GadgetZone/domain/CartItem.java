@@ -24,4 +24,18 @@ public class CartItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+    public void increaseQuantity() {
+        this.quantity++;
+    }
+
+    public void decreaseQuantity() {
+        if (this.quantity > 1) {
+            this.quantity--;
+        }
+    }
+
+    public double getTotalPrice() {
+        return product.getPrice() * quantity;
+    }
 }
