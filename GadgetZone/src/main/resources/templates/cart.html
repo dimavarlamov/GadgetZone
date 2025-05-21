@@ -1,47 +1,115 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
   <title>Корзина</title>
-  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <meta charset="UTF-8"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f9f9f9;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        margin-bottom: 20px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f0f0f0;
+    }
+
+    img {
+        width: 60px;
+        height: auto;
+        border-radius: 4px;
+    }
+
+    .total {
+        font-size: 1.2em;
+        text-align: right;
+        margin-bottom: 20px;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .actions a,
+    .actions button {
+        padding: 10px 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .actions .clear {
+        background-color: #f44336;
+    }
+
+    .actions .checkout {
+        background-color: #2196F3;
+    }
+  </style>
 </head>
 <body>
-<h1>Ваша корзина</h1>
 
-<div th:if="${#lists.isEmpty(cartItems)}">
-  <p>Корзина пуста.</p>
+<h1>🛒 Ваша корзина</h1>
+
+<table th:if="${#lists.isEmpty(cartItems) == false}">
+  <thead>
+  <tr>
+    <th>Товар</th>
+    <th>Цена</th>
+    <th>Количество</th>
+    <th>Изображение</th>
+    <th>Удалить</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="item : ${cartItems}">
+    <td th:text="${item.product.name}"></td>
+    <td th:text="${item.product.price} + ' ₽'"></td>
+    <td th:text="${item.quantity}"></td>
+    <td><img th:src="${item.product.imageUrl}" alt=""/></td>
+    <td>
+      <a th:href="@{'/cart/remove/' + ${item.product.id}}" onclick="return confirm('Удалить товар из корзины?')">❌</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<p th:if="${#lists.isEmpty(cartItems)}">Корзина пуста 😔</p>
+
+<div class="total" th:if="${#lists.isEmpty(cartItems) == false}">
+  <strong>Итого:</strong> <span th:text="${total} + ' ₽'"></span>
 </div>
 
-<div th:unless="${#lists.isEmpty(cartItems)}">
-  <table>
-    <thead>
-    <tr>
-      <th>Название</th>
-      <th>Цена</th>
-      <th>Количество</th>
-      <th>Сумма</th>
-      <th>Действия</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="product : ${cartItems}">
-      <td th:text="${product.name}">Название</td>
-      <td th:text="${product.price}">0.0</td>
-      <td th:text="${quantities[product.id]}">1</td>
-      <td th:text="${product.price * quantities[product.id]}">0.0</td>
-      <td>
-        <a th:href="@{'/cart/remove/' + ${product.id}}">Удалить</a>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-
-  <h3>Общая сумма: <span th:text="${total}">0.0</span> ₽</h3>
-
-  <a href="/cart/clear">Очистить корзину</a> |
-  <a href="/order/checkout">Оформить заказ</a>
+<div class="actions" th:if="${#lists.isEmpty(cartItems) == false}">
+  <a href="/cart/clear" class="clear">🗑️ Очистить корзину</a>
+  <form action="/order" method="post" style="display:inline;">
+    <button type="submit" class="checkout">✅ Оформить заказ</button>
+  </form>
 </div>
 
-<a href="/seller/products">← Вернуться к товарам</a>
+<p><a href="/" style="text-decoration:none;">⬅ Продолжить покупки</a></p>
+
 </body>
 </html>
