@@ -1,4 +1,4 @@
-package com.GadgetZone.controller;
+package com.GadgetZone.controllers;
 
 import com.GadgetZone.domain.User;
 import com.GadgetZone.service.FavoriteService;
@@ -47,4 +47,5 @@ public class FavoriteController {
         }
         return "favorites";
     }
+
 }

@@ -15,4 +15,3 @@ logging:
     "[org.springframework.jdbc.core]": DEBUG        
     "[org.springframework.jdbc.resultset]": TRACE   
     "[com.GadgetZone.dao]": DEBUG
-#    "[org.springframework.security]": DEBUG

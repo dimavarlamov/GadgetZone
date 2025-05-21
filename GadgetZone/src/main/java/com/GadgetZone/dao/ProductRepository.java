@@ -42,7 +42,6 @@ public class ProductRepository {
         ));
     }
 
-
     public void save(Product product) {
         if (product.getId() == 0) {
             String sql = "INSERT INTO products (name, description, price, stock, category_id, seller_id, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)";

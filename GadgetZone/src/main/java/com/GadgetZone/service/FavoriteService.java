@@ -1,11 +1,13 @@
 package com.GadgetZone.service;
 
 import com.GadgetZone.domain.Product;
-import com.GadgetZone.repository.FavoriteRepository;
+import com.GadgetZone.dao.FavoriteRepository;
+import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.List;
 
+@Service
 public class FavoriteService {
     private final FavoriteRepository favoriteRepository;
 
@@ -13,7 +15,7 @@ public class FavoriteService {
         this.favoriteRepository = favoriteRepository;
     }
 
-    public void toggleFavorite(int userId, int productId) throws SQLException {
+    public void toggleFavorite(Long userId, int productId) throws SQLException {
         if (favoriteRepository.isFavorite(userId, productId)) {
             favoriteRepository.removeFromFavorites(userId, productId);
         } else {
@@ -21,11 +23,11 @@ public class FavoriteService {
         }
     }
 
-    public boolean isFavorite(int userId, int productId) throws SQLException {
+    public boolean isFavorite(Long userId, int productId) throws SQLException {
         return favoriteRepository.isFavorite(userId, productId);
     }
 
-    public List<Product> getFavorites(int userId) throws SQLException {
+    public List<Product> getFavorites(Long userId) throws SQLException {
         return favoriteRepository.getFavoritesByUserId(userId);
     }
 }

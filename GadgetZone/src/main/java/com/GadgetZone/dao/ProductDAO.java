@@ -86,15 +86,15 @@ public class ProductDAO {
     }
 
     private Product mapRow(ResultSet rs) throws SQLException {
-        return Product.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .price(rs.getDouble("price"))
-                .stock(rs.getInt("stock"))
-                .categoryId(rs.getInt("category_id"))
-                .sellerId(rs.getInt("seller_id"))
-                .imageUrl(rs.getString("image_url"))
-                .build();
+        return new Product(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getDouble("price"),
+                rs.getInt("stock"),
+                rs.getInt("category_id"),
+                rs.getInt("seller_id"),
+                rs.getString("image_url")
+        );
     }
 }

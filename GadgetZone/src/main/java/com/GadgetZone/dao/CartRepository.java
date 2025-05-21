@@ -1,7 +1,6 @@
-package com.GadgetZone.repositories;
+package com.GadgetZone.dao;
 
 import com.GadgetZone.domain.CartItem;
-
 import java.util.List;
 
 public interface CartRepository {
@@ -9,4 +8,5 @@ public interface CartRepository {
     void removeItem(int userId, int productId);
     List<CartItem> getItems(int userId);
     void clearCart(int userId);
+    double getTotalAmount(int userId);
 }

@@ -10,7 +10,21 @@ public class Product {
     private int sellerId;
     private String imageUrl;
 
-    // Геттеры и сеттеры
+    public Product() {
+    }
+
+    public Product(int id, String name, String description, double price, int stock,
+                   int categoryId, int sellerId, String imageUrl) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+        this.categoryId = categoryId;
+        this.sellerId = sellerId;
+        this.imageUrl = imageUrl;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
