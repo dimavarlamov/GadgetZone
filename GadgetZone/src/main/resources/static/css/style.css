@@ -129,36 +129,30 @@ img {
 }
 
 /* Стили для формы регистрации */
-.user-form {
-    max-width: 500px;
-    margin: 2rem auto;
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f7f7f7; /* фон страницы */
+}
+
+.auth-content {
+    max-width: 400px;
+    width: 100%;
     padding: 2rem;
-    background: white;
+    background-color: #fff;
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.user-form table {
-    width: 100%;
-    border-collapse: collapse;
+.auth-title {
+    text-align: center;
+    font-size: 1.8rem;
+    color: var(--primary-color);
 }
 
-.user-form td {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-}
-
-.user-form input[type="text"],
-.user-form input[type="password"],
-.user-form input[type="email"] {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.user-form button {
+.auth-button {
     width: 100%;
     padding: 1rem;
     background-color: var(--primary-color);
@@ -166,12 +160,49 @@ img {
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
+    font-size: 1rem;
     transition: background 0.3s;
 }
 
-.user-form button:hover {
+.auth-button:hover {
     background-color: var(--secondary-color);
 }
+
+.auth-link {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.auth-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+.input-group label {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
 
 /* Стили для карточек товара */
 .product-grid {

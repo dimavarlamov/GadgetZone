@@ -1,18 +1,27 @@
 package com.GadgetZone.domain.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.GadgetZone.domain.Role;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class UserDTO {
-    private String username;
-    private String password;
-    private String matchingPassword;
-    private String email;
+    @NotBlank(message = "Имя обязательно")
+    @Size(min = 2, message = "Имя должно содержать минимум 2 символа")
     private String name;
+
+    @NotBlank
+    @Size(min = 8, message = "Пароль должен содержать не менее 8 символов")
+    private String password;
+
+    @NotBlank
+    private String matchingPassword;
+
+    @Email
+    @NotBlank
+    private String email;
+
+    private Role role;
 }

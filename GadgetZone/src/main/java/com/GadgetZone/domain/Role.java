@@ -1,5 +1,7 @@
 package com.GadgetZone.domain;
 
 public enum Role {
-    ADMIN, SELLER, CLIENT
+    BUYER,
+    SELLER,
+    ADMIN
 }

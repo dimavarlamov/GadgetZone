@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Регистрация</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-content">
+        <h2 class="auth-title">Создать аккаунт</h2>
+
+        <div th:if="${error}" class="error fade-in" th:text="${error}"></div>
+
+        <form class="auth-form" th:action="@{/register}" method="post" th:object="${user}">
+            <!-- Валидационные ошибки полей -->
+            <div th:if="${#fields.hasErrors()}" class="error fade-in">
+                <ul>
+                    <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                </ul>
+            </div>
+
+            <div class="input-group">
+                <input th:field="*{name}" type="text" placeholder=" " />
+                <label>Имя пользователя</label>
+            </div>
+
+            <div class="input-group">
+                <input th:field="*{email}" type="email" placeholder=" " required />
+                <label>Email</label>
+            </div>
+
+            <div class="input-group">
+                <input th:field="*{password}" type="password" placeholder=" " required />
+                <label>Пароль</label>
+            </div>
+
+            <div class="input-group">
+                <input th:field="*{matchingPassword}" type="password" placeholder=" " required />
+                <label>Подтвердите пароль</label>
+            </div>
+
+            <button class="auth-button" type="submit">Зарегистрироваться</button>
+        </form>
+
+        <p class="auth-link">Уже есть аккаунт? <a th:href="@{/login}">Войти</a></p>
+    </div>
+</div>
+</body>
+</html>

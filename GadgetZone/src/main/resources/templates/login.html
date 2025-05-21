@@ -1,23 +1,39 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login page</title>
+    <meta charset="UTF-8"/>
+    <title>Вход в аккаунт</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 <body>
-    <form th:action="@{/auth}" method="post">
-        <table border="1">
-            <tr>
-                <td>Name</td>
-                <td><input type="text" name="username"></td>
-            </tr>
-            <tr>
-                <td>Password</td>
-                <td><input type="password" name="password"></td>
-            </tr>
-        </table>
-        <button type="submit">Log in</button>
-    </form>
+<div class="auth-container">
+    <div class="auth-content">
+        <h2 class="auth-title">Добро пожаловать</h2>
+
+        <!-- Сообщение об ошибке -->
+        <div th:if="${param.error}" class="error fade-in">
+            Неверный логин или пароль
+        </div>
+        <div th:if="${param.logout}" class="success fade-in">
+            Вы успешно вышли из системы
+        </div>
+
+        <form class="auth-form" th:action="@{/auth}" method="post">
+        <div class="input-group">
+                <input type="text" name="username" placeholder=" " required/>
+                <label>Имя пользователя</label>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" placeholder=" " required/>
+                <label>Пароль</label>
+            </div>
+
+            <button class="auth-button" type="submit">Войти</button>
+        </form>
+
+        <p class="auth-link">Нет аккаунта? <a th:href="@{/register}">Зарегистрироваться</a></p>
+    </div>
+</div>
 </body>
 </html>

@@ -33,28 +33,34 @@ public class UserServiceImpl implements UserService {
         if (!userDTO.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new IllegalArgumentException("Введите корректный email");
         }
-        
+
+        if (userRepository.findByEmail(userDTO.getEmail()) != null) {
+            throw new IllegalArgumentException("Email уже используется");
+        }
+        if (userRepository.findByName(userDTO.getName()) != null) {
+            throw new IllegalArgumentException("Имя пользователя уже занято");
+        }
+
         User user = User.builder()
-                .username(userDTO.getUsername())
+                .name(userDTO.getName())
                 .password(passwordEncoder.encode(userDTO.getPassword()))
                 .email(userDTO.getEmail())
-                .name(userDTO.getName())
-                .role(Role.CLIENT) 
-                .balance(1000.00) 
+                .role(Role.BUYER)
+                .balance(1000.00)
                 .build();
-        
+
         return userRepository.save(user);
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException { 
-        User user = userRepository.findFirstByName(username); 
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByName(username);
         if (user == null) {
-            throw new UsernameNotFoundException("User not found with name: " + username);
+            throw new UsernameNotFoundException("Пользователь не найден с именем: " + username);
         }
 
         List<GrantedAuthority> roles = new ArrayList<>();
-        roles.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())); 
+        roles.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getName(),

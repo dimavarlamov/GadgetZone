@@ -13,12 +13,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-//hi
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
-    
+
     private final UserDetailsService userDetailsService;
 
     public SecurityConfig(@Lazy UserDetailsService userDetailsService) {
@@ -39,35 +39,30 @@ public class SecurityConfig {
     }
 
     @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .authorizeHttpRequests(auth -> auth
-        .requestMatchers(
-            "/", 
-            "/css/**", 
-            "/js/**", 
-            "/images/**", 
-            "/products"
-        ).permitAll()
-            
-            .requestMatchers("/admin/**").hasAuthority("ADMIN")
-            .requestMatchers("/seller/**").hasAuthority("SELLER")
-            .requestMatchers("/users/**").authenticated()
-            .anyRequest().permitAll()
-        )
-        .formLogin(form -> form
-            .loginPage("/login")
-            .loginProcessingUrl("/auth")
-            .permitAll()
-        )
-        .logout(logout -> logout
-            .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-            .logoutSuccessUrl("/")
-            .deleteCookies("JSESSIONID")
-            .invalidateHttpSession(true)
-        )
-        .csrf(csrf -> csrf.disable());
-    
-    return http.build();
-    }   
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/products").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/seller/**").hasAuthority("SELLER")
+                        .requestMatchers("/profile", "/users/**").authenticated()
+                        .anyRequest().permitAll()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/auth")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutSuccessUrl("/")
+                        .deleteCookies("JSESSIONID")
+                        .invalidateHttpSession(true)
+                )
+                .csrf(csrf -> csrf.disable());
+
+        return http.build();
+    }
 }
