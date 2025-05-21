@@ -1,115 +1,100 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Корзина</title>
+  <title>⭐ Избранное</title>
   <meta charset="UTF-8"/>
   <link rel="stylesheet" href="/css/styles.css"/>
   <style>
     body {
-        font-family: Arial, sans-serif;
-        margin: 40px;
-        background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
     }
 
     h1 {
-        color: #333;
+      color: #333;
+      margin-bottom: 20px;
     }
 
     table {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: #fff;
-        margin-bottom: 20px;
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      margin-bottom: 20px;
     }
 
     th, td {
-        padding: 12px;
-        border-bottom: 1px solid #ddd;
-        text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
     }
 
     th {
-        background-color: #f0f0f0;
+      background-color: #f0f0f0;
     }
 
     img {
-        width: 60px;
-        height: auto;
-        border-radius: 4px;
+      width: 60px;
+      height: auto;
+      border-radius: 4px;
     }
 
-    .total {
-        font-size: 1.2em;
-        text-align: right;
-        margin-bottom: 20px;
+    .actions form {
+      display: inline;
     }
 
-    .actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .actions a,
     .actions button {
-        padding: 10px 16px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        text-decoration: none;
-        cursor: pointer;
+      padding: 8px 12px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
 
-    .actions .clear {
-        background-color: #f44336;
+    .back-link {
+      text-decoration: none;
+      color: #2196F3;
     }
 
-    .actions .checkout {
-        background-color: #2196F3;
+    .back-link:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
 
-<h1>🛒 Ваша корзина</h1>
+<h1>⭐ Избранное</h1>
 
-<table th:if="${#lists.isEmpty(cartItems) == false}">
+<table th:if="${#lists.isEmpty(favorites) == false}">
   <thead>
   <tr>
     <th>Товар</th>
+    <th>Описание</th>
     <th>Цена</th>
-    <th>Количество</th>
     <th>Изображение</th>
     <th>Удалить</th>
   </tr>
   </thead>
   <tbody>
-  <tr th:each="item : ${cartItems}">
-    <td th:text="${item.product.name}"></td>
-    <td th:text="${item.product.price} + ' ₽'"></td>
-    <td th:text="${item.quantity}"></td>
-    <td><img th:src="${item.product.imageUrl}" alt=""/></td>
-    <td>
-      <a th:href="@{'/cart/remove/' + ${item.product.id}}" onclick="return confirm('Удалить товар из корзины?')">❌</a>
+  <tr th:each="product : ${favorites}">
+    <td th:text="${product.name}"></td>
+    <td th:text="${product.description}"></td>
+    <td th:text="${product.price} + ' ₽'"></td>
+    <td><img th:src="${product.imageUrl}" alt=""/></td>
+    <td class="actions">
+      <form th:action="@{/favorites/toggle}" method="post">
+        <input type="hidden" name="productId" th:value="${product.id}" />
+        <button type="submit">❌</button>
+      </form>
     </td>
   </tr>
   </tbody>
 </table>
 
-<p th:if="${#lists.isEmpty(cartItems)}">Корзина пуста 😔</p>
+<p th:if="${#lists.isEmpty(favorites)}">Вы ещё не добавили товары в избранное 😔</p>
 
-<div class="total" th:if="${#lists.isEmpty(cartItems) == false}">
-  <strong>Итого:</strong> <span th:text="${total} + ' ₽'"></span>
-</div>
-
-<div class="actions" th:if="${#lists.isEmpty(cartItems) == false}">
-  <a href="/cart/clear" class="clear">🗑️ Очистить корзину</a>
-  <form action="/order" method="post" style="display:inline;">
-    <button type="submit" class="checkout">✅ Оформить заказ</button>
-  </form>
-</div>
-
-<p><a href="/" style="text-decoration:none;">⬅ Продолжить покупки</a></p>
+<p><a href="/" class="back-link">⬅ Вернуться к покупкам</a></p>
 
 </body>
 </html>
