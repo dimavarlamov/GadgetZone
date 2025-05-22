@@ -48,13 +48,6 @@ public class SecurityConfig {
                         .requestMatchers("/profile", "/users/**").authenticated()
                         .anyRequest().permitAll()
                 )
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .loginProcessingUrl("/auth")
-//                        .defaultSuccessUrl("/profile", true)
-//                        .failureUrl("/login?error=true")
-//                        .permitAll()
-//                )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/auth")

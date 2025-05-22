@@ -1,6 +1,7 @@
 package com.GadgetZone.controllers;
 
 import com.GadgetZone.dao.UserRepository;
+import com.GadgetZone.domain.Role;
 import com.GadgetZone.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,11 @@ public class ProfileController {
 
         String name = authentication.getName();
         User user = userRepository.findByName(name);
+
+        if (user.getRole() == Role.SELLER) {
+            return "redirect:/seller/products/add";
+        }
+
         model.addAttribute("user", user);
         return "profile";
     }

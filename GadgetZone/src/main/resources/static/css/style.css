@@ -328,3 +328,122 @@ img {
 .remove-btn:hover {
     text-decoration: underline;
 }
+
+/* Кнопка "На главную" */
+.top-left-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 16px;
+    background-color: var(--primary-color, #4CAF50);
+    color: white;
+    border-radius: var(--border-radius, 6px);
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+    z-index: 1000;
+}
+
+.top-left-button:hover {
+    background-color: var(--secondary-color, #388E3C);
+}
+
+/* Кнопка "Выйти" */
+.top-right-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 16px;
+    background-color: #d9534f;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+    z-index: 1000;
+}
+
+.top-right-button:hover {
+    background-color: #c9302c;
+}
+
+/* Центровка контейнера */
+.centered-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+/* Стили страницы "Мои товары" */
+.my-products-page {
+    width: 90%;
+    max-width: 1000px;
+    background-color: #f4f4f4;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.my-products-page h1 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.my-products-page .button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.my-products-page table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.my-products-page th,
+.my-products-page td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ccc;
+}
+
+.my-products-page th {
+    background-color: #f0f0f0;
+}
+
+.my-products-page img {
+    border-radius: 4px;
+}
+
+.my-products-page form {
+    display: inline;
+}
+
+.my-products-page .action-buttons a,
+.my-products-page .action-buttons button {
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.my-products-page {
+    width: 100%;
+    max-width: 1000px;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    margin: 20px;
+}
