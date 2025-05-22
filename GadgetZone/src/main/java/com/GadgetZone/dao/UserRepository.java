@@ -1,7 +1,7 @@
 package com.GadgetZone.dao;
 
 import com.GadgetZone.domain.User;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import com.GadgetZone.domain.Role;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -17,14 +17,28 @@ public class UserRepository {
     }
 
     public User findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = ?";
-        List<User> users = jdbc.query(sql, new BeanPropertyRowMapper<>(User.class), email);
+        String sql = "SELECT id, name, password_hash, email, role, balance FROM users WHERE email = ?";
+        List<User> users = jdbc.query(sql, (rs, rowNum) -> User.builder()
+                .id(rs.getLong("id"))
+                .name(rs.getString("name"))
+                .password(rs.getString("password_hash"))
+                .email(rs.getString("email"))
+                .role(Role.valueOf(rs.getString("role")))
+                .balance(rs.getDouble("balance"))
+                .build(), email);
         return users.isEmpty() ? null : users.get(0);
     }
 
     public User findByName(String name) {
-        String sql = "SELECT * FROM users WHERE name = ?";
-        List<User> users = jdbc.query(sql, new BeanPropertyRowMapper<>(User.class), name);
+        String sql = "SELECT id, name, password_hash, email, role, balance FROM users WHERE name = ?";
+        List<User> users = jdbc.query(sql, (rs, rowNum) -> User.builder()
+                .id(rs.getLong("id"))
+                .name(rs.getString("name"))
+                .password(rs.getString("password_hash"))
+                .email(rs.getString("email"))
+                .role(Role.valueOf(rs.getString("role")))
+                .balance(rs.getDouble("balance"))
+                .build(), name);
         return users.isEmpty() ? null : users.get(0);
     }
 

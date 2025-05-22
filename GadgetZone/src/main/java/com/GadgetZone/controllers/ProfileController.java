@@ -20,9 +20,8 @@ public class ProfileController {
             return "redirect:/login";
         }
 
-        String email = authentication.getName(); // email как логин
-        User user = userRepository.findByEmail(email);
-
+        String name = authentication.getName();
+        User user = userRepository.findByName(name);
         model.addAttribute("user", user);
         return "profile";
     }

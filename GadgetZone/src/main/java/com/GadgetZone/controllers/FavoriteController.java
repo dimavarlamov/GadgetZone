@@ -1,10 +1,11 @@
 package com.GadgetZone.controllers;
 
+import com.GadgetZone.dao.UserRepository;
 import com.GadgetZone.domain.User;
-import com.GadgetZone.service.FavoriteService;
 import com.GadgetZone.domain.Product;
+import com.GadgetZone.service.FavoriteService;
 
-import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,29 +16,23 @@ import java.util.List;
 @Controller
 @RequestMapping("/favorites")
 public class FavoriteController {
+
     private final FavoriteService favoriteService;
+    private final UserRepository userRepository;
 
-    public FavoriteController(FavoriteService favoriteService) {
+    public FavoriteController(FavoriteService favoriteService, UserRepository userRepository) {
         this.favoriteService = favoriteService;
-    }
-
-    @PostMapping("/toggle")
-    public String toggleFavorite(@RequestParam int productId, HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) return "redirect:/login";
-
-        try {
-            favoriteService.toggleFavorite(user.getId(), productId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "redirect:/products/" + productId;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
-    public String viewFavorites(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) return "redirect:/login";
+    public String viewFavorites(Authentication authentication, Model model) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email);
 
         try {
             List<Product> favorites = favoriteService.getFavorites(user.getId());
@@ -45,7 +40,7 @@ public class FavoriteController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return "favorites";
     }
-
 }

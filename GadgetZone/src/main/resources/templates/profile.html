@@ -10,9 +10,8 @@
     <div class="auth-content">
         <h2 class="auth-title">Профиль пользователя</h2>
 
-        <p><strong>Имя пользователя:</strong> <span th:text="${user.username}"></span></p>
+        <p><strong>Имя:</strong> <span th:text="${user.name} ?: '—'"></span></p>
         <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
-        <p><strong>Имя (отображаемое):</strong> <span th:text="${user.name} ?: '—'"></span></p>
         <p><strong>Баланс:</strong> <span th:text="${user.balance} + ' ₽'"></span></p>
         <p><strong>Роль:</strong> <span th:text="${user.role}"></span></p>
 
