@@ -15,6 +15,11 @@
         <p><strong>Баланс:</strong> <span th:text="${user.balance} + ' ₽'"></span></p>
         <p><strong>Роль:</strong> <span th:text="${user.role}"></span></p>
 
+        <!-- ССЫЛКА ТОЛЬКО ДЛЯ ПРОДАВЦА -->
+        <div th:if="${user.role == 'SELLER'}" style="margin-top: 1.5rem;">
+            <a th:href="@{/seller/products}" class="btn">Управление товарами</a>
+        </div>
+
         <a th:href="@{/logout}" class="btn" style="margin-top: 2rem; display: inline-block;">Выйти</a>
     </div>
 </div>

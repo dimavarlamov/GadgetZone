@@ -83,4 +83,8 @@ public class ProductService {
             throw new IllegalArgumentException("Этот товар уже был заказан. Редактирование ограничено!");
         }
     }
+    public List<Product> getProductsBySeller(int sellerId) {
+        return productRepository.findBySellerId(sellerId);
+    }
+
 }

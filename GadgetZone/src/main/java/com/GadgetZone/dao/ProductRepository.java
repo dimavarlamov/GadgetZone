@@ -30,7 +30,7 @@ public class ProductRepository {
 
     public Product findById(long id) {
         String sql = "SELECT * FROM products WHERE id = ?";
-        return jdbc.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> new Product(
+        return jdbc.queryForObject(sql, (rs, rowNum) -> new Product(
                 rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("description"),
@@ -39,7 +39,7 @@ public class ProductRepository {
                 rs.getInt("category_id"),
                 rs.getInt("seller_id"),
                 rs.getString("image_url")
-        ));
+        ), id);
     }
 
     public void save(Product product) {
@@ -72,5 +72,19 @@ public class ProductRepository {
     public void delete(int id) {
         String sql = "DELETE FROM products WHERE id = ?";
         jdbc.update(sql, id);
+    }
+
+    public List<Product> findBySellerId(int sellerId) {
+        String sql = "SELECT * FROM products WHERE seller_id = ?";
+        return jdbc.query(sql, (rs, rowNum) -> new Product(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getDouble("price"),
+                rs.getInt("stock"),
+                rs.getInt("category_id"),
+                rs.getInt("seller_id"),
+                rs.getString("image_url")
+        ), sellerId);
     }
 }

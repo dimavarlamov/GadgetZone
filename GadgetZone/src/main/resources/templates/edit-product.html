@@ -3,26 +3,84 @@
 <head>
   <title>Редактировать товар</title>
   <meta charset="UTF-8"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f4f4f4;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    form {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 600px;
+    }
+
+    label {
+        display: block;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+
+    input[type="text"], input[type="number"], textarea {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .error {
+        color: red;
+        font-size: 0.9em;
+    }
+  </style>
 </head>
 <body>
-<h1>Редактирование товара</h1>
 
-<form th:action="@{/seller/products/edit}" th:object="${product}" method="post">
+<h1>Редактировать товар</h1>
+
+<form th:action="@{/seller/products/edit}" method="post" th:object="${product}">
   <input type="hidden" th:field="*{id}"/>
 
-  <p>Название (нельзя изменить): <input type="text" th:field="*{name}" readonly/></p>
-  <p>Описание: <textarea th:field="*{description}"></textarea></p>
-  <p>Цена: <input type="number" step="0.01" th:field="*{price}"/></p>
-  <p>Количество: <input type="number" th:field="*{stock}"/></p>
-  <p>Категория (ID): <input type="number" th:field="*{categoryId}"/></p>
-  <p>Продавец (ID): <input type="number" th:field="*{sellerId}"/></p>
-  <p>Ссылка на изображение: <input type="text" th:field="*{imageUrl}"/></p>
+  <label for="name">Название:</label>
+  <input type="text" id="name" th:field="*{name}" required/>
+  <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
 
-  <div th:if="${error}" style="color:red;" th:text="${error}"></div>
+  <label for="description">Описание:</label>
+  <textarea id="description" th:field="*{description}" required></textarea>
+  <div class="error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
 
-  <button type="submit">Сохранить</button>
+  <label for="price">Цена:</label>
+  <input type="number" id="price" step="0.01" th:field="*{price}" required/>
+  <div class="error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+
+  <label for="stock">Количество на складе:</label>
+  <input type="number" id="stock" th:field="*{stock}" required/>
+  <div class="error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
+
+  <label for="imageUrl">URL изображения:</label>
+  <input type="text" id="imageUrl" th:field="*{imageUrl}" required/>
+  <div class="error" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}"></div>
+
+  <button type="submit">Обновить</button>
 </form>
 
-<p><a href="/seller/products">⬅ Назад к товарам</a></p>
 </body>
 </html>
