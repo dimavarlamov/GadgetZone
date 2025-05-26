@@ -53,4 +53,33 @@ public class UserRepository {
         );
         return updated == 1;
     }
+
+    public boolean update(User user) {
+        String sql = "UPDATE users SET name = ?, email = ?, password_hash = ?, role = ?, balance = ?, enabled = ? WHERE id = ?";
+        int updated = jdbc.update(sql,
+                user.getName(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRole().name(),
+                user.getBalance(),
+                user.isEnabled(),
+                user.getId()
+        );
+        return updated == 1;
+    }
+
+    public User findById(Long id) {
+        String sql = "SELECT id, name, password_hash, email, role, balance, enabled FROM users WHERE id = ?";
+        List<User> users = jdbc.query(sql, (rs, rowNum) -> User.builder()
+                .id(rs.getLong("id"))
+                .name(rs.getString("name"))
+                .password(rs.getString("password_hash"))
+                .email(rs.getString("email"))
+                .role(Role.valueOf(rs.getString("role")))
+                .balance(rs.getDouble("balance"))
+                .enabled(rs.getBoolean("enabled"))
+                .build(), id);
+        return users.isEmpty() ? null : users.get(0);
+    }
+
 }

@@ -7,11 +7,23 @@ spring:
 
   flyway:
     enabled: true
-    baseline-on-migrate: true 
-    locations: classpath:db/migration 
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: edik076mvs@gmail.com
+    password: qwerty!12345!
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 logging:
   level:
-    "[org.springframework.jdbc.core]": DEBUG        
-    "[org.springframework.jdbc.resultset]": TRACE   
+    "[org.springframework.jdbc.core]": DEBUG
+    "[org.springframework.jdbc.resultset]": TRACE
     "[com.GadgetZone.dao]": DEBUG

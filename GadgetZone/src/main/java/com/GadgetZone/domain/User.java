@@ -28,6 +28,6 @@ public class User {
     private String email;
 
     private Role role;
-
     private double balance;
+    private boolean enabled = false;
 }

@@ -6,4 +6,5 @@ import com.GadgetZone.domain.dto.UserDTO;
 
 public interface UserService extends UserDetailsService {
     boolean save(UserDTO userDTO);
+    boolean verifyAccount(String token);
 }   
