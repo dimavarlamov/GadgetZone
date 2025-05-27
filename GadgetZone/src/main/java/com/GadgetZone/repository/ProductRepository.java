@@ -16,6 +16,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -88,5 +90,44 @@ public class ProductRepository {
                     .imageUrl(rs.getString("image_url"))
                     .build();
         }
+    }
+    public Page<Product> searchAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1 ");
+        StringBuilder countSql = new StringBuilder("SELECT COUNT(*) FROM products WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (query != null && !query.isBlank()) {
+            sql.append("AND (name LIKE ? OR description LIKE ?) ");
+            countSql.append("AND (name LIKE ? OR description LIKE ?) ");
+            params.add("%" + query + "%");
+            params.add("%" + query + "%");
+        }
+
+        if (category != null && !category.isBlank()) {
+            sql.append("AND category_id = (SELECT id FROM categories WHERE name = ?) ");
+            countSql.append("AND category_id = (SELECT id FROM categories WHERE name = ?) ");
+            params.add(category);
+        }
+
+        if (minPrice != null) {
+            sql.append("AND price >= ? ");
+            countSql.append("AND price >= ? ");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append("AND price <= ? ");
+            countSql.append("AND price <= ? ");
+            params.add(maxPrice);
+        }
+
+        sql.append("LIMIT ? OFFSET ?");
+        params.add(pageable.getPageSize());
+        params.add(pageable.getOffset());
+
+        List<Product> products = jdbc.query(sql.toString(), new ProductRowMapper(), params.toArray());
+        long total = jdbc.queryForObject(countSql.toString(), Long.class, params.subList(0, params.size() - 2).toArray());
+
+        return new PageImpl<>(products, pageable, total);
     }
 }

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Результаты поиска</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header class="header">
+  <div class="nav">
+    <div class="logo">
+      <a th:href="@{/}"><img src="/images/logo.png" alt="GadgetZone Logo"/></a>
+    </div>
+    <form method="get" th:action="@{/products/search}" class="nav-search">
+      <input type="text" name="keyword" class="search-input" placeholder="Поиск товаров..." />
+      <input type="text" name="category" class="search-input" placeholder="Категория" />
+      <input type="number" name="minPrice" class="search-input" placeholder="Цена от" step="0.01" />
+      <input type="number" name="maxPrice" class="search-input" placeholder="Цена до" step="0.01" />
+      <button type="submit" class="search-button">Найти</button>
+    </form>
+    <ul class="nav-menu">
+      <li><a class="nav-link" th:href="@{/profile}">Профиль</a></li>
+      <li><a class="nav-link" th:href="@{/orders}">Заказы</a></li>
+      <li><a class="nav-link" th:href="@{/favorites}">Избранное</a></li>
+      <li><a class="nav-link" th:href="@{/cart}">Корзина</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+  <div class="product-grid">
+    <div class="product-card" th:each="product : ${products}">
+      <img th:src="${product.imageUrl}" alt="Product Image" class="product-img">
+      <h3 th:text="${product.name}">Название</h3>
+      <p class="price" th:text="${product.price} + ' ₽'">Цена</p>
+      <a th:href="@{'/cart/add/' + ${product.id}}" class="btn">Купить</a>
+    </div>
+  </div>
+
+  <div th:if="${#lists.isEmpty(products)}" class="centered-container">
+    <p style="font-size: 18px; color: var(--primary-color);">Ничего не найдено.</p>
+  </div>
+</main>
+
+</body>
+</html>
