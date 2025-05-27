@@ -12,7 +12,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.authentication.DisabledException;
 
 @Configuration
 @EnableWebSecurity
@@ -39,32 +41,33 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return (request, response, exception) -> {
+            String errorMessage = "Неверное имя пользователя или пароль";
+            String redirectUrl = "/auth/login?error=true";
+            
+            if (exception instanceof DisabledException) {
+                String email = exception.getMessage().split(":")[1].trim();
+                redirectUrl = "/auth/login?error=true&unverified=" + email;
+            }
+            
+            response.sendRedirect(redirectUrl);
+        };
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/products").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/seller/**").hasAuthority("SELLER")
-                        .requestMatchers("/profile", "/users/**").authenticated()
+                        .requestMatchers("/seller/**").hasRole("SELLER")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/auth")
-                        .usernameParameter("username")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/profile", true)
-                        .failureUrl("/login?error=true")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/")
-                        .deleteCookies("JSESSIONID")
-                        .invalidateHttpSession(true)
-                )
-                .csrf(csrf -> csrf.disable());
-
+                        .loginPage("/auth/login")
+                        .usernameParameter("email")
+                        .defaultSuccessUrl("/")
+                );
         return http.build();
     }
 }

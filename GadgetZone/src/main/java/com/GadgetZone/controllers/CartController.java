@@ -1,86 +1,59 @@
 package com.GadgetZone.controllers;
 
-import com.GadgetZone.domain.CartItem;
-import com.GadgetZone.domain.User;
+import com.GadgetZone.entity.CartItem;
+import com.GadgetZone.entity.User;
+import com.GadgetZone.exceptions.InsufficientStockException;
 import com.GadgetZone.service.CartService;
-import com.GadgetZone.dao.UserRepository;
+import com.GadgetZone.repository.UserRepository;
 
+import com.GadgetZone.service.FavoriteService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
 @Controller
 @RequestMapping("/cart")
+@RequiredArgsConstructor
 public class CartController {
 
     private final CartService cartService;
-    private final UserRepository userRepository;
+    private final FavoriteService favoriteService;
 
-    public CartController(CartService cartService, UserRepository userRepository) {
-        this.cartService = cartService;
-        this.userRepository = userRepository;
-    }
-
-    // Добавление товара
     @PostMapping("/add/{productId}")
-    public String addToCart(@PathVariable int productId, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            String email = authentication.getName();
-            User user = userRepository.findByEmail(email);
-            if (user != null) {
-                cartService.addItem(user.getId().intValue(), productId);
-            }
+    public String addToCart(@PathVariable Long productId,
+                            @RequestParam(defaultValue = "1") int quantity,
+                            @AuthenticationPrincipal User user,
+                            RedirectAttributes attributes) {
+        try {
+            cartService.addToCart(user.getId(), productId, quantity);
+            attributes.addFlashAttribute("success", "Товар добавлен в корзину");
+        } catch (InsufficientStockException e) {
+            attributes.addFlashAttribute("error", e.getMessage());
         }
+        return "redirect:/products/" + productId;
+    }
+
+    @PostMapping("/remove/{productId}")
+    public String removeFromCart(@PathVariable Long productId,
+                                 @AuthenticationPrincipal User user,
+                                 RedirectAttributes attributes) {
+        cartService.removeFromCart(user.getId(), productId);
+        attributes.addFlashAttribute("success", "Товар удален из корзины");
         return "redirect:/cart";
     }
 
-    // Удаление товара
-    @GetMapping("/remove/{productId}")
-    public String removeFromCart(@PathVariable int productId, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            String email = authentication.getName();
-            User user = userRepository.findByEmail(email);
-            if (user != null) {
-                cartService.removeItem(user.getId().intValue(), productId);
-            }
-        }
-        return "redirect:/cart";
-    }
-
-    // Очистка корзины
-    @GetMapping("/clear")
-    public String clearCart(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            String email = authentication.getName();
-            User user = userRepository.findByEmail(email);
-            if (user != null) {
-                cartService.clearCart(user.getId().intValue());
-            }
-        }
-        return "redirect:/cart";
-    }
-
-    // Показ корзины
-    @GetMapping
-    public String showCart(Model model, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return "redirect:/login";
-        }
-
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return "redirect:/login";
-        }
-
-        List<CartItem> items = cartService.getCartItems(user.getId().intValue());
-        double total = cartService.getTotalAmount(user.getId().intValue());
-
-        model.addAttribute("cartItems", items);
-        model.addAttribute("total", total);
-        return "cart";
+    @PostMapping("/favorite/{productId}")
+    public String toggleFavorite(@PathVariable Long productId,
+                                 @AuthenticationPrincipal User user,
+                                 RedirectAttributes attributes) {
+        favoriteService.toggleFavorite(user.getId(), productId);
+        attributes.addFlashAttribute("success", "Избранное обновлено");
+        return "redirect:/products/" + productId;
     }
 }

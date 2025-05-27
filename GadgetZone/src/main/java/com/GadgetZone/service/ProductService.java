@@ -1,90 +1,67 @@
 package com.GadgetZone.service;
 
-import com.GadgetZone.dao.ProductRepository;
-import com.GadgetZone.dao.OrderDAO;
-import com.GadgetZone.domain.Product;
+import com.GadgetZone.entity.Category;
+import com.GadgetZone.entity.Product;
 
+import com.GadgetZone.exceptions.ProductInUseException;
+import com.GadgetZone.exceptions.ProductNotFoundException;
+import com.GadgetZone.repository.OrderRepository;
+import com.GadgetZone.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
-
     private final ProductRepository productRepository;
-    private final OrderDAO orderDAO;
+    private final OrderRepository orderRepository;
 
-    public ProductService(ProductRepository productRepository, OrderDAO orderDAO) {
-        this.productRepository = productRepository;
-        this.orderDAO = orderDAO;
+    @Transactional
+    public Product createProduct(Product product) {
+        return productRepository.save(product);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    @Transactional
+    public Product updateProduct(Long productId, Product productDetails, Long sellerId) {
+        Product product = getProductById(productId);
+        if (!product.getSellerId().equals(sellerId)) {
+            throw new AccessDeniedException("Not product owner");
+        }
+        product.setName(productDetails.getName());
+        product.setDescription(productDetails.getDescription());
+        product.setPrice(productDetails.getPrice());
+        product.setStock(productDetails.getStock());
+        product.setImageUrl(productDetails.getImageUrl());
+
+        return productRepository.save(product);
     }
 
-    public void addProduct(@Validated Product product) {
-        validateProduct(product);
-        productRepository.save(product);
-    }
-
-    public void updateProduct(Product product) {
-        if (product == null || product.getId() == 0) {
-            throw new IllegalArgumentException("Неверный ID продукта.");
-        }
-
-        Product existingProduct = productRepository.findById(product.getId());
-        if (existingProduct == null) {
-            throw new IllegalArgumentException("Товар не найден!");
-        }
-
-        validateProduct(product);
-
-        existingProduct.setName(product.getName());
-        existingProduct.setDescription(product.getDescription());
-        existingProduct.setPrice(product.getPrice());
-        existingProduct.setStock(product.getStock());
-        existingProduct.setImageUrl(product.getImageUrl());
-        existingProduct.setCategoryId(product.getCategoryId());
-        existingProduct.setSellerId(product.getSellerId());
-
-        productRepository.save(existingProduct);
-    }
-
-    public void deleteProduct(int id) {
-        Product product = productRepository.findById(id);
-        if (product == null) {
-            throw new IllegalArgumentException("Товар не найден!");
-        }
-
-
-        productRepository.delete(id);
-    }
-
-    public Product getProductById(int id) {
-        return productRepository.findById(id);
-    }
-
-    private void validateProduct(Product product) {
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Название товара обязательно!");
-        }
-        if (product.getPrice() <= 0) {
-            throw new IllegalArgumentException("Цена должна быть больше нуля!");
-        }
-        if (product.getStock() < 0) {
-            throw new IllegalArgumentException("Количество не может быть отрицательным!");
-        }
-        if (product.getImageUrl() == null || product.getImageUrl().trim().isEmpty()) {
-            throw new IllegalArgumentException("Ссылка на изображение обязательна!");
-        }
-        if (orderDAO.isProductOrdered(product.getId())) {
-            throw new IllegalArgumentException("Этот товар уже был заказан. Редактирование ограничено!");
-        }
-    }
-    public List<Product> getProductsBySeller(int sellerId) {
+    public List<Product> getProductsBySeller(Long sellerId) {
         return productRepository.findBySellerId(sellerId);
     }
 
+    @Transactional(readOnly = true)
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(ProductNotFoundException::new);
+    }
+
+    public Page<Product> searchProducts(String query, Pageable pageable) {
+        return productRepository.search(query, pageable);
+    }
+
+    @Transactional
+    public void deleteProduct(Long productId) {
+        if (orderRepository.existsByProductId(productId)) {
+            throw new ProductInUseException();
+        }
+        productRepository.delete(productId);
+    }
 }

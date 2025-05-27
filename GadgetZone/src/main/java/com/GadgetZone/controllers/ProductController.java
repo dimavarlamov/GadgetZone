@@ -1,9 +1,16 @@
 package com.GadgetZone.controllers;
 
-import com.GadgetZone.domain.Product;
+import com.GadgetZone.entity.Product;
+import com.GadgetZone.entity.User;
+import com.GadgetZone.exceptions.ProductInUseException;
+import com.GadgetZone.repository.CategoryRepository;
 import com.GadgetZone.service.ProductService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,80 +18,77 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @Controller
 @RequestMapping("/seller/products")
+@PreAuthorize("hasRole('SELLER')")
+@RequiredArgsConstructor
 public class ProductController {
-
     private final ProductService productService;
+    private final CategoryRepository categoryRepository;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
-    }
-
-    // Показать список товаров продавца
     @GetMapping
-    public String listProducts(Model model) {
-        List<Product> products = productService.getAllProducts();
+    public String sellerProducts(@AuthenticationPrincipal User user, Model model) {
+        List<Product> products = productService.getProductsBySeller(user.getId());
         model.addAttribute("products", products);
-        return "product-list"; // шаблон product-list.html
+        return "seller/products";
     }
 
-    // Форма добавления товара
     @GetMapping("/add")
-    public String showAddForm(Model model) {
+    public String addProductForm(Model model) {
         model.addAttribute("product", new Product());
-        return "add-product"; // шаблон add-product.html
+        model.addAttribute("categories", categoryRepository.findAll());
+        return "seller/add-product";
     }
 
-    // Обработка добавления товара
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute("product") @Valid Product product,
-                             BindingResult bindingResult,
+    public String addProduct(@Valid @ModelAttribute Product product,
+                             BindingResult result,
+                             @AuthenticationPrincipal User user,
                              Model model) {
-        if (bindingResult.hasErrors()) {
-            return "add-product";
+        if (result.hasErrors()) {
+            model.addAttribute("categories", categoryRepository.findAll());
+            return "seller/add-product";
         }
-        try {
-            productService.addProduct(product);
-            return "redirect:/seller/products";
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-            return "add-product";
-        }
+        product.setSellerId(user.getId());
+        productService.createProduct(product);
+        return "redirect:/seller/products";
     }
 
-    // Форма редактирования товара
     @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable int id, Model model) {
+    public String editProductForm(@PathVariable Long id,
+                                  @AuthenticationPrincipal User user,
+                                  Model model) {
         Product product = productService.getProductById(id);
-        if (product == null) {
-            return "redirect:/seller/products";
+        if (!product.getSellerId().equals(user.getId())) {
+            throw new AccessDeniedException("Нет прав на редактирование");
         }
         model.addAttribute("product", product);
-        return "edit-product"; // шаблон edit-product.html
+        model.addAttribute("categories", categoryRepository.findAll());
+        return "seller/edit-product";
     }
 
-    // Обработка редактирования товара
-    @PostMapping("/edit")
-    public String updateProduct(@ModelAttribute("product") @Valid Product product,
-                                BindingResult bindingResult,
+    @PostMapping("/edit/{id}")
+    public String updateProduct(@PathVariable Long id,
+                                @Valid @ModelAttribute Product product,
+                                BindingResult result,
+                                @AuthenticationPrincipal User user,
                                 Model model) {
-        if (bindingResult.hasErrors()) {
-            return "edit-product";
+        if (result.hasErrors()) {
+            model.addAttribute("categories", categoryRepository.findAll());
+            return "seller/edit-product";
         }
-        try {
-            productService.updateProduct(product);
-            return "redirect:/seller/products";
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-            return "edit-product";
-        }
+        productService.updateProduct(id, product, user.getId());
+        return "redirect:/seller/products";
     }
 
-    // Удаление товара
-    @GetMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable int id) {
-        productService.deleteProduct(id);
-        return "redirect:/seller/products";
+    @PostMapping("/delete/{id}")
+    public String deleteProduct(@PathVariable Long id) {
+        try {
+            productService.deleteProduct(id);
+            return "redirect:/seller/products?success=true";
+        } catch (ProductInUseException e) {
+            return "redirect:/seller/products?error=" + e.getMessage();
+        }
     }
 }

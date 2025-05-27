@@ -1,33 +1,40 @@
 package com.GadgetZone.service;
 
-import com.GadgetZone.domain.Product;
-import com.GadgetZone.dao.FavoriteRepository;
+import com.GadgetZone.entity.Favorite;
+import com.GadgetZone.entity.Product;
+import com.GadgetZone.exceptions.ProductNotFoundException;
+import com.GadgetZone.repository.FavoriteRepository;
+import com.GadgetZone.repository.ProductRepository;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FavoriteService {
     private final FavoriteRepository favoriteRepository;
+    private final ProductRepository productRepository;
 
-    public FavoriteService(FavoriteRepository favoriteRepository) {
-        this.favoriteRepository = favoriteRepository;
-    }
-
-    public void toggleFavorite(Long userId, int productId) throws SQLException {
-        if (favoriteRepository.isFavorite(userId, productId)) {
-            favoriteRepository.removeFromFavorites(userId, productId);
+    @Transactional
+    public void toggleFavorite(Long userId, Long productId) {
+        if (favoriteRepository.existsByUserAndProduct(userId, productId)) {
+            favoriteRepository.deleteByUserAndProduct(userId, productId);
         } else {
-            favoriteRepository.addToFavorites(userId, productId);
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(ProductNotFoundException::new);
+            favoriteRepository.save(new Favorite(userId, product.getId()));
         }
     }
 
-    public boolean isFavorite(Long userId, int productId) throws SQLException {
-        return favoriteRepository.isFavorite(userId, productId);
-    }
-
-    public List<Product> getFavorites(Long userId) throws SQLException {
-        return favoriteRepository.getFavoritesByUserId(userId);
+    @Transactional(readOnly = true)
+    public List<Product> getUserFavorites(Long userId) {
+        return favoriteRepository.findByUserId(userId).stream()
+                .map(favorite -> productRepository.findById(favorite.getProductId())
+                        .orElseThrow(ProductNotFoundException::new))
+                .collect(Collectors.toList());
     }
 }

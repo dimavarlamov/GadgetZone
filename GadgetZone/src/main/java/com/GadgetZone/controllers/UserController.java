@@ -1,5 +1,6 @@
 package com.GadgetZone.controllers;
 
+import com.GadgetZone.entity.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.GadgetZone.domain.dto.UserDTO;
 import com.GadgetZone.service.UserService;
 
 import jakarta.validation.Valid;
@@ -24,18 +24,13 @@ public class UserController {
 
     @GetMapping("/new")
     public String newUser(Model model) {
-        model.addAttribute("user", new UserDTO());
+        model.addAttribute("user", new User());
         return "user";
     }
 
-    @PostMapping("/user/new")
-    public String createUser(
-            @Valid @ModelAttribute("user") UserDTO userDTO,
-            BindingResult result) {
-        if (result.hasErrors()) {
-            return "user";
-        }
-        userService.save(userDTO);
+    @PostMapping
+    public String createUser(@Valid @ModelAttribute User user) {
+        userService.register(user);
         return "redirect:/login";
     }
 }

@@ -1,29 +1,27 @@
 package com.GadgetZone.controllers;
 
-import com.GadgetZone.dao.UserRepository;
-import com.GadgetZone.domain.User;
-import com.GadgetZone.domain.Product;
+import com.GadgetZone.repository.UserRepository;
+import com.GadgetZone.entity.User;
+import com.GadgetZone.entity.Product;
 import com.GadgetZone.service.FavoriteService;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
 import java.util.List;
 
 @Controller
 @RequestMapping("/favorites")
+@RequiredArgsConstructor
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
     private final UserRepository userRepository;
 
-    public FavoriteController(FavoriteService favoriteService, UserRepository userRepository) {
-        this.favoriteService = favoriteService;
-        this.userRepository = userRepository;
-    }
 
     @GetMapping
     public String viewFavorites(Authentication authentication, Model model) {
@@ -32,15 +30,11 @@ public class FavoriteController {
         }
 
         String email = authentication.getName();
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        try {
-            List<Product> favorites = favoriteService.getFavorites(user.getId());
-            model.addAttribute("favorites", favorites);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        List<Product> favorites = favoriteService.getUserFavorites(user.getId());
+        model.addAttribute("favorites", favorites);
         return "favorites";
     }
 }

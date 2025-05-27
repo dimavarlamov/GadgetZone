@@ -13,4 +13,5 @@ public class GadgetZoneApplication {
 		PasswordEncoder encoder = context.getBean(PasswordEncoder.class);
 		System.out.println(encoder.encode("pass"));
 	}
+
 }

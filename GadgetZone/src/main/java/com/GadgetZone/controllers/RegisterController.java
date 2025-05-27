@@ -1,6 +1,6 @@
 package com.GadgetZone.controllers;
 
-import com.GadgetZone.domain.dto.UserDTO;
+import com.GadgetZone.entity.User;
 import com.GadgetZone.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,33 +17,17 @@ public class RegisterController {
 
     @GetMapping("/register")
     public String registerPage(Model model) {
-        model.addAttribute("user", new UserDTO());
+        model.addAttribute("user", new User());
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@Valid @ModelAttribute("user") UserDTO userDTO,
-                               BindingResult result,
-                               Model model) {
-        if (!userDTO.getPassword().equals(userDTO.getMatchingPassword())) {
-            result.rejectValue("matchingPassword", null, "Пароли не совпадают");
-        }
-
+    public String registerUser(@Valid @ModelAttribute("user") User user,
+                               BindingResult result) {
         if (result.hasErrors()) {
             return "register";
         }
-
-        try {
-            boolean success = userService.save(userDTO);
-            if (!success) {
-                model.addAttribute("error", "Ошибка при сохранении пользователя");
-                return "register";
-            }
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-            return "register";
-        }
-
+        userService.register(user);
         return "redirect:/login";
     }
 }
