@@ -54,5 +54,5 @@ public class AuthController {
 //                "Не удалось отправить письмо. Пожалуйста, проверьте email или обратитесь в поддержку.");
 //        }
 //        return "redirect:/auth/login";
-//    }
+//
 } 
