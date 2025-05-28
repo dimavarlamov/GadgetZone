@@ -13,7 +13,7 @@
         <div th:if="${error}" class="error fade-in" th:text="${error}"></div>
 
         <form class="auth-form" th:action="@{/register}" method="post" th:object="${user}">
-            <!-- Валидационные ошибки полей -->
+
             <div th:if="${#fields.hasErrors()}" class="error fade-in">
                 <ul>
                     <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
@@ -21,29 +21,29 @@
             </div>
 
             <div class="input-group">
-                <input th:field="*{name}" type="text" placeholder=" " />
+                <input th:field="*{name}" type="text" placeholder=" " required/>
                 <label>Имя пользователя</label>
             </div>
 
             <div class="input-group">
-                <input th:field="*{email}" type="email" placeholder=" " required />
+                <input th:field="*{email}" type="email" placeholder=" " required/>
                 <label>Email</label>
             </div>
 
             <div class="input-group">
-                <input th:field="*{password}" type="password" placeholder=" " required />
+                <input th:field="*{password}" type="password" placeholder=" " required/>
                 <label>Пароль</label>
             </div>
 
             <div class="input-group">
-                <input th:field="*{matchingPassword}" type="password" placeholder=" " required />
+                <input th:field="*{matchingPassword}" type="password" placeholder=" " required/>
                 <label>Подтвердите пароль</label>
             </div>
 
-            <button class="auth-button" type="submit">Зарегистрироваться</button>
+            <button type="submit" class="auth-button">Зарегистрироваться</button>
         </form>
 
-        <p class="auth-link">Уже есть аккаунт? <a th:href="@{/login}">Войти</a></p>
+        <p class="auth-link">Уже есть аккаунт? <a th:href="@{/auth/login}">Войти</a></p>
     </div>
 </div>
 </body>

@@ -23,19 +23,30 @@ public class UserRepository {
 
     public User save(User user) {
         if (user.getId() == null) {
-            String sql = "INSERT INTO users (email, password, role) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO users (name, email, password, role, balance, enabled) VALUES (?, ?, ?, ?, ?, ?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-                ps.setString(1, user.getEmail());
-                ps.setString(2, user.getPassword());
-                ps.setString(3, user.getRole().name());
+                ps.setString(1, user.getName());
+                ps.setString(2, user.getEmail());
+                ps.setString(3, user.getPassword());
+                ps.setString(4, user.getRole().name());
+                ps.setBigDecimal(5, user.getBalance());
+                ps.setBoolean(6, user.isEnabled());
                 return ps;
             }, keyHolder);
             user.setId(keyHolder.getKey().longValue());
         } else {
-            String sql = "UPDATE users SET email = ?, password = ?, role = ? WHERE id = ?";
-            jdbc.update(sql, user.getEmail(), user.getPassword(), user.getRole().name(), user.getId());
+            String sql = "UPDATE users SET name = ?, email = ?, password = ?, role = ?, balance = ?, enabled = ? WHERE id = ?";
+            jdbc.update(sql,
+                    user.getName(),
+                    user.getEmail(),
+                    user.getPassword(),
+                    user.getRole().name(),
+                    user.getBalance(),
+                    user.isEnabled(),
+                    user.getId()
+            );
         }
         return user;
     }

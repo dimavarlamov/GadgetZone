@@ -50,4 +50,13 @@ public class VerificationTokenRepository {
                     .build();
         }
     }
+
+    public Optional<VerificationToken> findByUserId(Long userId) {
+        String sql = "SELECT * FROM verification_tokens WHERE user_id = ?";
+        try {
+            return Optional.ofNullable(jdbc.queryForObject(sql, new VerificationTokenRowMapper(), userId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 }

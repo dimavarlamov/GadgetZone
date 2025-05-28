@@ -11,10 +11,9 @@
     <header class="header">
         <nav class="nav">
             <a href="/" class="logo">
-<!--                 <img src="/GadgetZone/src/main/resources/static/images/logo.jpg" alt="Логотип GadgetZone">-->
                 <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img">
-            </a>    
-            
+            </a>
+
             <div class="nav-search">
                 <input type="text" placeholder="Поиск товаров..." class="search-input">
                 <button class="search-button">Найти</button>
@@ -34,7 +33,7 @@
         </nav>
     </header>
 
-    <main>
+<main>
         <div class="product-grid">
             <div th:each="product : ${products}" class="product-card">
                 <img th:src="@{'/images/' + ${product.imageUrl}}" alt="Товар" class="product-img">

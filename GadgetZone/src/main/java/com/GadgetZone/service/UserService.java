@@ -5,10 +5,13 @@ import com.GadgetZone.entity.Role;
 import com.GadgetZone.entity.User;
 import com.GadgetZone.entity.VerificationToken;
 import com.GadgetZone.exceptions.EmailExistsException;
+import com.GadgetZone.exceptions.ExpiredTokenException;
 import com.GadgetZone.exceptions.InvalidTokenException;
 import com.GadgetZone.exceptions.UserNotFoundException;
 import com.GadgetZone.repository.UserRepository;
 import com.GadgetZone.repository.VerificationTokenRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +29,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
+    @Value("${app.url}")
+    private String appUrl;
 
     @Transactional
     public User register(User user) {
@@ -59,16 +64,22 @@ public class UserService {
         verificationToken.setUserId(user.getId());
         verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
         verificationTokenRepository.save(verificationToken);
-        emailService.sendVerificationEmail(user.getEmail(), token);
+
+        String verificationLink = appUrl + "/auth/verify?token=" + token;
+        emailService.sendVerificationEmail(user.getEmail(), verificationLink);
     }
 
     @Transactional
     public void verifyEmail(String token) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(InvalidTokenException::new);
+                .orElseThrow(() -> new InvalidTokenException("Неверный токен подтверждения"));
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new ExpiredTokenException("Срок действия токена истек");
+        }
 
         User user = userRepository.findById(verificationToken.getUserId())
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
 
         user.setEnabled(true);
         userRepository.save(user);
@@ -91,4 +102,25 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+
+        if (user.isEnabled()) {
+            throw new IllegalArgumentException("Аккаунт уже подтверждён");
+        }
+
+        VerificationToken oldToken = verificationTokenRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new InvalidTokenException("Токен не найден"));
+
+        verificationTokenRepository.delete(oldToken);
+        sendVerificationEmail(user);
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
 }

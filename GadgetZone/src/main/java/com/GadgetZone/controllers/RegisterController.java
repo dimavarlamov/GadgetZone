@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequiredArgsConstructor
 public class RegisterController {
-
     private final UserService userService;
 
     @GetMapping("/register")
@@ -28,6 +27,6 @@ public class RegisterController {
             return "register";
         }
         userService.register(user);
-        return "redirect:/login";
+        return "redirect:/auth/login?success";
     }
 }

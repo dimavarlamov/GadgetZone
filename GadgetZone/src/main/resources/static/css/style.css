@@ -447,3 +447,93 @@ img {
     box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     margin: 20px;
 }
+
+/* Стили управления категориями */
+.category-management {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.category-form {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+}
+
+.category-form input[type="text"] {
+    width: 70%;
+    padding: 0.8rem;
+    margin-right: 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+}
+
+.category-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.category-table th,
+.category-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.category-table th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.category-table td {
+    background-color: #fff;
+}
+
+.category-table a {
+    color: var(--text-color);
+    margin-right: 1rem;
+    transition: color 0.3s;
+}
+
+.category-table a:hover {
+    color: var(--secondary-color);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .category-management {
+        padding: 1rem;
+        margin: 1rem;
+    }
+
+    .category-form input[type="text"] {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .category-table td,
+    .category-table th {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Сообщение об ошибке */
+.error-message {
+    color: #dc3545;
+    padding: 1rem;
+    border: 1px solid #f5c2c7;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.error-message a.btn {
+    margin-top: 0.5rem;
+    display: inline-block;
+}

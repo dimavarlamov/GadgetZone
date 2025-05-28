@@ -4,7 +4,11 @@ import com.GadgetZone.entity.Category;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import java.sql.PreparedStatement;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,5 +32,22 @@ public class CategoryRepository {
                     .title(rs.getString("title"))
                     .build();
         }
+    }
+
+    public Category save(Category category) {
+        if (category.getId() == null) {
+            String sql = "INSERT INTO categories (title) VALUES (?)";
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbc.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+                ps.setString(1, category.getTitle());
+                return ps;
+            }, keyHolder);
+            category.setId(keyHolder.getKey().longValue());
+        } else {
+            String sql = "UPDATE categories SET title = ? WHERE id = ?";
+            jdbc.update(sql, category.getTitle(), category.getId());
+        }
+        return category;
     }
 }

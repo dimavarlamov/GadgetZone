@@ -11,16 +11,25 @@
     <div class="auth-content">
         <h2 class="auth-title">Профиль пользователя</h2>
 
-        <p><strong>Имя:</strong> <span th:text="${user.name} ?: '—'"></span></p>
-        <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
-        <p><strong>Баланс:</strong> <span th:text="${user.balance} + ' ₽'"></span></p>
-        <p><strong>Роль:</strong> <span th:text="${user.role}"></span></p>
+        <div th:if="${user}">
+            <p><strong>Имя:</strong> <span th:text="${user.name} ?: '—'"></span></p>
+            <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+            <p><strong>Баланс:</strong> <span th:text="${#numbers.formatDecimal(user.balance, 1, 2)} + ' ₽'"></span></p>
+            <p><strong>Роль:</strong> <span th:text="${user.role}"></span></p>
 
-        <div th:if="${user.role == 'SELLER'}" style="margin-top: 1.5rem;">
-            <a th:href="@{/seller/products}" class="btn">Управление товарами</a>
+            <div th:if="${user.role == 'SELLER'}" style="margin-top: 1.5rem;">
+                <a th:href="@{/seller/products}" class="btn">Управление товарами</a>
+            </div>
         </div>
 
-        <a th:href="@{/logout}" class="btn" style="margin-top: 2rem; display: inline-block;">Выйти</a>
+        <div th:unless="${user}" class="error-message">
+            <p>Пользователь не авторизован!</p>
+            <a th:href="@{/auth/login}" class="btn">Войти</a>
+        </div>
+
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn">Выйти</button>
+        </form>
     </div>
 </div>
 </body>

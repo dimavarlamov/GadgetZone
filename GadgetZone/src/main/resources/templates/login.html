@@ -19,17 +19,19 @@
         </div>
 
         <!-- Форма повторной отправки письма для неподтвержденных аккаунтов -->
-        <div th:if="${unverifiedEmail}" class="resend-verification">
+        <div th:if="${unverifiedEmail}" class="alert alert-warning">
+            <p>Ваш email не подтверждён. Пожалуйста, проверьте вашу почту.</p>
             <form th:action="@{/auth/resend-verification}" method="post">
-                <input type="hidden" name="email" th:value="${unverifiedEmail}"/>
-                <button type="submit" class="resend-button">Отправить письмо повторно</button>
+                <input type="hidden" name="email" th:value="${unverifiedEmail}">
+                <button type="submit" class="btn btn-link">Отправить письмо повторно</button>
             </form>
         </div>
 
+
         <form class="auth-form" th:action="@{/auth/login}" method="post">
             <div class="input-group">
-                <input type="text" name="username" placeholder=" " required/>
-                <label>Имя пользователя</label>
+                <input type="email" name="email" required>
+                <label>Email пользователя</label>
             </div>
 
             <div class="input-group">
@@ -40,7 +42,7 @@
             <button class="auth-button" type="submit">Войти</button>
         </form>
 
-        <p class="auth-link">Нет аккаунта? <a th:href="@{/auth/register}">Зарегистрироваться</a></p>
+        <p class="auth-link">Нет аккаунта? <a th:href="@{/register}">Зарегистрироваться</a></p>
     </div>
 </div>
 </body>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление категориями</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<a th:href="@{/seller/products}" class="top-left-button">← К товарам</a>
+
+<div class="category-management">
+    <h1>Управление категориями</h1>
+
+    <!-- Форма добавления новой категории -->
+    <form class="category-form" th:action="@{/seller/categories/add}" method="post" th:object="${newCategory}">
+        <div th:if="${#fields.hasErrors('*')}" class="error">
+            <div th:each="err : ${#fields.errors('*')}" th:text="${err}"></div>
+        </div>
+
+        <input type="text"
+               th:field="*{title}"
+               placeholder="Название категории"
+               required>
+        <button type="submit" class="auth-button">Добавить категорию</button>
+    </form>
+
+    <!-- Таблица существующих категорий -->
+    <table class="category-table">
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="category : ${categories}">
+            <td th:text="${category.title}"></td>
+            <td>
+                <a th:href="@{/seller/categories/edit/{id}(id=${category.id})}" class="btn">✏️</a>
+                <a th:href="@{/seller/categories/delete/{id}(id=${category.id})}" class="btn delete-btn">❌</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
