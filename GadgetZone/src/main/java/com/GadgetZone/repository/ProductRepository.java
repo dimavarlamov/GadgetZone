@@ -1,12 +1,8 @@
 package com.GadgetZone.repository;
 
 import com.GadgetZone.entity.Product;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -14,10 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
-import java.util.ArrayList;
-
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -55,26 +48,83 @@ public class ProductRepository {
         return jdbc.query(sql, new ProductRowMapper(), sellerId);
     }
 
-    public Page<Product> search(String query, Pageable pageable) {
+    public List<Product> search(String query, int page, int size) {
         String sql = "SELECT * FROM products WHERE name LIKE ? LIMIT ? OFFSET ?";
-        List<Product> products = jdbc.query(
-                sql,
-                new ProductRowMapper(),
-                "%" + query + "%",
-                pageable.getPageSize(),
-                pageable.getOffset()
-        );
-        return new PageImpl<>(products, pageable, countSearchResults(query));
+        return jdbc.query(sql, new ProductRowMapper(), "%" + query + "%", size, page * size);
     }
 
-    private long countSearchResults(String query) {
+    public long countSearchResults(String query) {
         String sql = "SELECT COUNT(*) FROM products WHERE name LIKE ?";
         return jdbc.queryForObject(sql, Long.class, "%" + query + "%");
     }
 
-    @Transactional
     public void delete(Long id) {
         jdbc.update("DELETE FROM products WHERE id = ?", id);
+    }
+
+    public List<Product> searchAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (query != null && !query.isBlank()) {
+            sql.append("AND (name LIKE ? OR description LIKE ?) ");
+            params.add("%" + query + "%");
+            params.add("%" + query + "%");
+        }
+
+        if (category != null && !category.isBlank()) {
+            sql.append("AND category_id = (SELECT id FROM categories WHERE name = ?) ");
+            params.add(category);
+        }
+
+        if (minPrice != null) {
+            sql.append("AND price >= ? ");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append("AND price <= ? ");
+            params.add(maxPrice);
+        }
+
+        sql.append("LIMIT ? OFFSET ?");
+        params.add(size);
+        params.add(page * size);
+
+        return jdbc.query(sql.toString(), new ProductRowMapper(), params.toArray());
+    }
+
+    public long countSearchAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (query != null && !query.isBlank()) {
+            sql.append("AND (name LIKE ? OR description LIKE ?) ");
+            params.add("%" + query + "%");
+            params.add("%" + query + "%");
+        }
+
+        if (category != null && !category.isBlank()) {
+            sql.append("AND category_id = (SELECT id FROM categories WHERE name = ?) ");
+            params.add(category);
+        }
+
+        if (minPrice != null) {
+            sql.append("AND price >= ? ");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append("AND price <= ? ");
+            params.add(maxPrice);
+        }
+
+        return jdbc.queryForObject(sql.toString(), Long.class, params.toArray());
+    }
+
+    // Добавленный метод countAdvanced, делегирующий вызов countSearchAdvanced
+    public long countAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice) {
+        return countSearchAdvanced(query, category, minPrice, maxPrice);
     }
 
     private static class ProductRowMapper implements RowMapper<Product> {
@@ -90,44 +140,5 @@ public class ProductRepository {
                     .imageUrl(rs.getString("image_url"))
                     .build();
         }
-    }
-    public Page<Product> searchAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1 ");
-        StringBuilder countSql = new StringBuilder("SELECT COUNT(*) FROM products WHERE 1=1 ");
-        List<Object> params = new ArrayList<>();
-
-        if (query != null && !query.isBlank()) {
-            sql.append("AND (name LIKE ? OR description LIKE ?) ");
-            countSql.append("AND (name LIKE ? OR description LIKE ?) ");
-            params.add("%" + query + "%");
-            params.add("%" + query + "%");
-        }
-
-        if (category != null && !category.isBlank()) {
-            sql.append("AND category_id = (SELECT id FROM categories WHERE name = ?) ");
-            countSql.append("AND category_id = (SELECT id FROM categories WHERE name = ?) ");
-            params.add(category);
-        }
-
-        if (minPrice != null) {
-            sql.append("AND price >= ? ");
-            countSql.append("AND price >= ? ");
-            params.add(minPrice);
-        }
-
-        if (maxPrice != null) {
-            sql.append("AND price <= ? ");
-            countSql.append("AND price <= ? ");
-            params.add(maxPrice);
-        }
-
-        sql.append("LIMIT ? OFFSET ?");
-        params.add(pageable.getPageSize());
-        params.add(pageable.getOffset());
-
-        List<Product> products = jdbc.query(sql.toString(), new ProductRowMapper(), params.toArray());
-        long total = jdbc.queryForObject(countSql.toString(), Long.class, params.subList(0, params.size() - 2).toArray());
-
-        return new PageImpl<>(products, pageable, total);
     }
 }

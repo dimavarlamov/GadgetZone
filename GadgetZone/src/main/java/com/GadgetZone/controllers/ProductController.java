@@ -18,20 +18,30 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @Controller
 @RequestMapping("/seller/products")
 @PreAuthorize("hasRole('SELLER')")
 @RequiredArgsConstructor
 public class ProductController {
+
     private final ProductService productService;
     private final CategoryRepository categoryRepository;
 
+    // Обновлённый метод для отображения страницы с поиском и пагинацией
     @GetMapping
-    public String sellerProducts(@AuthenticationPrincipal User user, Model model) {
-        List<Product> products = productService.getProductsBySeller(user.getId());
+    public String showHomePage(@RequestParam(name = "search", required = false) String search,
+                               @RequestParam(name = "page", defaultValue = "1") int page,
+                               Model model) {
+        int pageSize = 9;
+        List<Product> products = productService.searchProducts(search, page - 1, pageSize);
+        long total = productService.countSearchResults(search);
+        int totalPages = (int) Math.ceil((double) total / pageSize);
+
         model.addAttribute("products", products);
-        return "seller/products";
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("search", search);
+        return "home";
     }
 
     @GetMapping("/add")

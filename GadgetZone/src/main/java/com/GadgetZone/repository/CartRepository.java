@@ -16,6 +16,7 @@ import java.util.List;
 public class CartRepository {
     private final JdbcTemplate jdbc;
 
+    // Метод для добавления товара в корзину
     public void addItem(Long userId, Long productId, int quantity) {
         String sql = "INSERT INTO cart_items (user_id, product_id, quantity) " +
                 "VALUES (?, ?, ?) " +
@@ -23,6 +24,7 @@ public class CartRepository {
         jdbc.update(sql, userId, productId, quantity);
     }
 
+    // Метод для получения всех товаров в корзине
     public List<CartItem> findByUserId(Long userId) {
         String sql = "SELECT ci.*, p.* FROM cart_items ci " +
                 "JOIN products p ON ci.product_id = p.id " +
@@ -30,16 +32,26 @@ public class CartRepository {
         return jdbc.query(sql, new CartItemRowMapper(), userId);
     }
 
+    // Метод для удаления товара из корзины
     public void removeItem(Long userId, Long productId) {
         String sql = "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
         jdbc.update(sql, userId, productId);
     }
 
+    // Метод для очистки корзины
     public void clear(Long userId) {
         String sql = "DELETE FROM cart_items WHERE user_id = ?";
         jdbc.update(sql, userId);
     }
 
+    // Метод для проверки существования товара в корзине
+    public boolean existsByUserAndProduct(Long userId, Long productId) {
+        String sql = "SELECT COUNT(*) FROM cart_items WHERE user_id = ? AND product_id = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, userId, productId);
+        return count != null && count > 0;
+    }
+
+    // Маппер для CartItem
     private static class CartItemRowMapper implements RowMapper<CartItem> {
         @Override
         public CartItem mapRow(ResultSet rs, int rowNum) throws SQLException {

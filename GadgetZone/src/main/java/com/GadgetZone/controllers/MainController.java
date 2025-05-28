@@ -2,15 +2,13 @@ package com.GadgetZone.controllers;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.GadgetZone.entity.Product;
 import com.GadgetZone.service.ProductService;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class MainController {
@@ -24,7 +22,8 @@ public class MainController {
     public String homePage(Model model,
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "") String search) {
-        Page<Product> products = productService.searchProducts(search, PageRequest.of(page, 9));
+        int pageSize = 9;
+        List<Product> products = productService.searchProducts(search, page, pageSize);
         model.addAttribute("products", products);
         model.addAttribute("searchQuery", search);
         return "index";

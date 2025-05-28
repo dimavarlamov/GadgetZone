@@ -6,6 +6,10 @@
   <link rel="stylesheet" href="/static/styles.css"> <!-- если есть CSS -->
 </head>
 <body>
+
+<!-- Вставка уведомлений -->
+<div th:replace="fragments/messages :: *"></div>
+
 <h2>Мои избранные товары</h2>
 
 <div class="favorites-list">

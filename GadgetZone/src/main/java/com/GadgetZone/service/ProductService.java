@@ -1,18 +1,14 @@
 package com.GadgetZone.service;
 
-import com.GadgetZone.entity.Category;
 import com.GadgetZone.entity.Product;
-
 import com.GadgetZone.exceptions.ProductInUseException;
 import com.GadgetZone.exceptions.ProductNotFoundException;
 import com.GadgetZone.repository.OrderRepository;
 import com.GadgetZone.repository.ProductRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -53,8 +49,25 @@ public class ProductService {
                 .orElseThrow(ProductNotFoundException::new);
     }
 
-    public Page<Product> searchProducts(String query, Pageable pageable) {
-        return productRepository.search(query, pageable);
+    public List<Product> searchProducts(String query, int page, int size) {
+        return productRepository.search(query, page, size);
+    }
+
+    public long countSearchResults(String query) {
+        return productRepository.countSearchResults(query);
+    }
+
+    public List<Product> searchAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
+        return productRepository.searchAdvanced(query, category, minPrice, maxPrice, page, size);
+    }
+
+    public long countSearchAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice) {
+        return productRepository.countSearchAdvanced(query, category, minPrice, maxPrice);
+    }
+
+    // Добавляем недостающий метод countAdvanced
+    public long countAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice) {
+        return productRepository.countAdvanced(query, category, minPrice, maxPrice);
     }
 
     @Transactional
@@ -63,8 +76,5 @@ public class ProductService {
             throw new ProductInUseException();
         }
         productRepository.delete(productId);
-    }
-    public Page<Product> searchAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
-        return productRepository.searchAdvanced(query, category, minPrice, maxPrice, pageable);
     }
 }
