@@ -1,11 +1,36 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
+  <meta charset="UTF-8">
   <title>Заказ оформлен</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<h2>Спасибо за заказ!</h2>
-<p>Ваш заказ был успешно оформлен.</p>
-<a href="/">Вернуться в магазин</a>
+
+<header class="header">
+  <div class="nav">
+    <div class="logo">
+      <a th:href="@{/}"><img src="/images/logo.png" alt="GadgetZone Logo"/></a>
+    </div>
+    <ul class="nav-menu">
+      <li><a class="nav-link" th:href="@{/profile}">Профиль</a></li>
+      <li><a class="nav-link" th:href="@{/orders}">Заказы</a></li>
+      <li><a class="nav-link" th:href="@{/favorites}">Избранное</a></li>
+      <li><a class="nav-link" th:href="@{/cart}">Корзина</a></li>
+    </ul>
+  </div>
+</header>
+
+<main class="centered-container">
+  <div class="auth-content" style="max-width: 500px; text-align: center;">
+    <h2 class="auth-title">Спасибо за заказ! 🎉</h2>
+    <p style="margin-top: 20px; font-size: 18px; color: #444;">
+      Ваш заказ был успешно оформлен.<br/>
+      Мы отправим вам уведомление, когда он будет передан в доставку.
+    </p>
+    <a href="/" class="auth-button" style="margin-top: 30px; display: inline-block;">Вернуться в магазин</a>
+  </div>
+</main>
+
 </body>
 </html>

@@ -1,85 +1,47 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
-    <title>Добавить товар</title>
-    <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="/css/styles.css"/>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f4f4f4;
-        }
-
-        h1 {
-            color: #333;
-        }
-
-        form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 600px;
-        }
-
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        input[type="text"], input[type="number"], textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .error {
-            color: red;
-            font-size: 0.9em;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Избранное</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
-<h1>Добавить товар</h1>
+<header class="header">
+    <div class="nav">
+        <div class="logo">
+            <a th:href="@{/}"><img src="/images/logo.png" alt="GadgetZone Logo" /></a>
+        </div>
+        <ul class="nav-menu">
+            <li><a class="nav-link" th:href="@{/profile}">Профиль</a></li>
+            <li><a class="nav-link" th:href="@{/orders}">Заказы</a></li>
+            <li><a class="nav-link" th:href="@{/favorites}">Избранное</a></li>
+            <li><a class="nav-link" th:href="@{/cart}">Корзина</a></li>
+        </ul>
+    </div>
+</header>
 
-<form th:action="@{/seller/products/add}" method="post" th:object="${product}">
-    <label for="name">Название:</label>
-    <input type="text" id="name" th:field="*{name}" required/>
-    <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+<main>
+    <h2 style="text-align: center; margin: 30px 0; color: var(--primary-color);">Мои избранные товары</h2>
 
-    <label for="description">Описание:</label>
-    <textarea id="description" th:field="*{description}" required></textarea>
-    <div class="error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+    <div th:if="${favorites.isEmpty()}" class="centered-container">
+        <p style="font-size: 18px; color: #555;">У вас пока нет избранных товаров.</p>
+    </div>
 
-    <label for="price">Цена:</label>
-    <input type="number" id="price" step="0.01" th:field="*{price}" required/>
-    <div class="error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+    <div class="product-grid">
+        <div class="product-card" th:each="product : ${favorites}">
+            <img th:src="${product.imageUrl}" alt="Product Image" class="product-img">
+            <h3 th:text="${product.name}">Название</h3>
+            <p class="price" th:text="${product.price} + ' ₽'">Цена</p>
 
-    <label for="stock">Количество на складе:</label>
-    <input type="number" id="stock" th:field="*{stock}" required/>
-    <div class="error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
+            <form th:action="@{/favorites/toggle}" method="post">
+                <input type="hidden" name="productId" th:value="${product.id}" />
+                <button type="submit" class="btn" style="background-color: #d9534f;">Удалить из избранного</button>
+            </form>
+        </div>
+    </div>
 
-    <label for="imageUrl">URL изображения:</label>
-    <input type="text" id="imageUrl" th:field="*{imageUrl}" required/>
-    <div class="error" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}"></div>
-
-    <button type="submit">Сохранить</button>
-</form>
+</main>
 
 </body>
 </html>
-

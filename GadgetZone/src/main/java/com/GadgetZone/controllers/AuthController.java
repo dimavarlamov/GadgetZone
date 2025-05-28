@@ -1,12 +1,16 @@
 package com.GadgetZone.controllers;
 
+import com.GadgetZone.entity.User;
+import com.GadgetZone.exceptions.EmailExistsException;
 import com.GadgetZone.service.EmailService;
 import com.GadgetZone.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 @Controller
@@ -23,32 +27,20 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginPage(
-            @RequestParam(value = "error", required = false) String error,
-            @RequestParam(value = "success", required = false) String success,
-            @RequestParam(value = "unverified", required = false) String email,
-            Model model
-    ) {
-        if (error != null) {
-            model.addAttribute("error", "Неверные учетные данные");
-        }
-        if (success != null) {
-            model.addAttribute("success", "Регистрация успешно завершена!");
-        }
-        if (email != null) {
-            model.addAttribute("unverifiedEmail", email);
-            model.addAttribute("error", "Аккаунт не подтвержден");
+    public String login(@RequestParam(value = "unverified", required = false) String unverifiedEmail,
+                       @RequestParam(value = "error", required = false) String error,
+                       Model model) {
+        if (unverifiedEmail != null) {
+            model.addAttribute("unverifiedEmail", unverifiedEmail);
+            model.addAttribute("error", 
+                "Аккаунт не подтвержден. Пожалуйста, проверьте почту или запросите новое письмо с подтверждением.");
+        } else if (error != null) {
+            if (!model.containsAttribute("error")) {
+                model.addAttribute("error", "Неверное имя пользователя или пароль");
+            }
         }
         return "login";
     }
-
-    @PostMapping("/resend-verification")
-    public String resendVerification(@RequestParam String email) {
-        userService.resendVerificationEmail(email);
-        return "redirect:/auth/login?resent";
-    }
-
-}
 
 //    @PostMapping("/resend-verification")
 //    public String resendVerification(@RequestParam("email") String email,
@@ -63,3 +55,4 @@ public class AuthController {
 //        }
 //        return "redirect:/auth/login";
 //    }
+} 

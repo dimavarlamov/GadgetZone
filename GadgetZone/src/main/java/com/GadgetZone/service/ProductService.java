@@ -64,4 +64,7 @@ public class ProductService {
         }
         productRepository.delete(productId);
     }
+    public Page<Product> searchAdvanced(String query, String category, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        return productRepository.searchAdvanced(query, category, minPrice, maxPrice, pageable);
+    }
 }
