@@ -19,12 +19,12 @@ public class ProfileController {
     private final UserService userService;
     private final OrderService orderService;
 
-    @GetMapping
+    @GetMapping("/profile")
     public String profilePage(@AuthenticationPrincipal User user, Model model) {
         User profile = userService.getUserById(user.getId());
         List<Order> orders = orderService.getOrdersByUserId(user.getId());
         model.addAttribute("user", profile);
         model.addAttribute("orders", orders);
-        return "profile";
+        return "profile";  // Имя шаблона (profile.html)
     }
 }
