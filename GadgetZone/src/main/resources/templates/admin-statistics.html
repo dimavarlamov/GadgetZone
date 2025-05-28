@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Статистика продаж</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<a href="/admin/dashboard" class="top-left-button">← Назад</a>
+<h1>Статистика за период</h1>
+
+<div class="statistics-container">
+    <div class="date-range">
+        <span th:text="${#temporals.format(start, 'dd.MM.yyyy')}"></span> -
+        <span th:text="${#temporals.format(end, 'dd.MM.yyyy')}"></span>
+    </div>
+
+    <div class="stat-item">
+        <h3>Общая выручка:</h3>
+        <p th:text="${report.totalRevenue} + ' ₽'"></p>
+    </div>
+
+    <div class="stat-item">
+        <h3>Всего заказов:</h3>
+        <p th:text="${report.totalOrders}"></p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,12 +1,11 @@
 package com.GadgetZone.controllers;
 
+import com.GadgetZone.entity.Role;
 import com.GadgetZone.entity.User;
 import com.GadgetZone.service.UserService;
 import com.GadgetZone.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +26,13 @@ public class ProfileController {
         User user = userService.getUserByEmail(email);
 
         model.addAttribute("user", user);
-        model.addAttribute("orders", orderService.getOrdersByUserId(user.getId()));
+
+        if (user.getRole() == Role.ROLE_SELLER) {
+            model.addAttribute("dashboardLink", "/seller/dashboard");
+        } else if (user.getRole() == Role.ROLE_ADMIN) {
+            model.addAttribute("dashboardLink", "/admin/dashboard");
+        }
+
         return "profile";
     }
 }

@@ -24,10 +24,11 @@ public class AdminController {
         this.statisticsService = statisticsService;
     }
 
+    // Управление пользователями
     @GetMapping("/users")
     public String userManagement(Model model) {
         model.addAttribute("users", userService.getAllUsers());
-        return "admin/users";
+        return "admin-users";
     }
 
     @PostMapping("/users/{userId}/balance")
@@ -35,18 +36,30 @@ public class AdminController {
                                 @RequestParam BigDecimal amount,
                                 RedirectAttributes attributes) {
         userService.updateUserBalance(userId, amount);
-        attributes.addFlashAttribute("success", "Баланс успешно обновлен");
+        attributes.addFlashAttribute("success", "Баланс успешно обновлён");
         return "redirect:/admin/users";
     }
 
+    // Статистика продаж
     @GetMapping("/statistics")
-    public String salesStatistics(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
-                                  Model model) {
+    public String salesStatistics(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+            Model model) {
+
         if (start == null) start = LocalDate.now().minusDays(7);
         if (end == null) end = LocalDate.now();
 
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
         model.addAttribute("report", statisticsService.generateSalesReport(start, end));
-        return "admin/statistics";
+
+        return "admin-statistics";
+    }
+
+    // Главная панель админа
+    @GetMapping("/dashboard")
+    public String adminDashboard() {
+        return "admin-dashboard";
     }
 }

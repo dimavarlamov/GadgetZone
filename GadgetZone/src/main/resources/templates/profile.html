@@ -15,10 +15,10 @@
             <p><strong>Имя:</strong> <span th:text="${user.name} ?: '—'"></span></p>
             <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
             <p><strong>Баланс:</strong> <span th:text="${#numbers.formatDecimal(user.balance, 1, 2)} + ' ₽'"></span></p>
-            <p><strong>Роль:</strong> <span th:text="${user.role}"></span></p>
+            <p><strong>Роль:</strong> <span th:text="${user.role.name()}"></span></p>
 
-            <div th:if="${user.role == 'SELLER'}" style="margin-top: 1.5rem;">
-                <a th:href="@{/seller/products}" class="btn">Управление товарами</a>
+            <div th:if="${user.role.name() == 'ROLE_SELLER' or user.role.name() == 'ROLE_ADMIN'}">
+                <a th:href="@{${dashboardLink}}" class="btn">Перейти в панель управления</a>
             </div>
         </div>
 

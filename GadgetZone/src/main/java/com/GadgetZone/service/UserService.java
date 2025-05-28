@@ -37,7 +37,7 @@ public class UserService {
         validateUserRegistration(user);
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(Role.BUYER);
+        user.setRole(Role.ROLE_BUYER);
         user.setBalance(BigDecimal.valueOf(1000.00));
         user.setEnabled(false);
 

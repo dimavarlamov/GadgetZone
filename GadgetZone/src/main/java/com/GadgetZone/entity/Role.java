@@ -1,7 +1,7 @@
 package com.GadgetZone.entity;
 
 public enum Role {
-    BUYER,
-    SELLER,
-    ADMIN
+    ROLE_BUYER,
+    ROLE_SELLER,
+    ROLE_ADMIN
 }

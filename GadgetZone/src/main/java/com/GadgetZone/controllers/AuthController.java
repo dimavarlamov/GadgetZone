@@ -28,12 +28,12 @@ public class AuthController {
 
     @GetMapping("/login")
     public String login(@RequestParam(value = "unverified", required = false) String unverifiedEmail,
-                       @RequestParam(value = "error", required = false) String error,
-                       Model model) {
+                        @RequestParam(value = "error", required = false) String error,
+                        Model model) {
         if (unverifiedEmail != null) {
             model.addAttribute("unverifiedEmail", unverifiedEmail);
-            model.addAttribute("error", 
-                "Аккаунт не подтвержден. Пожалуйста, проверьте почту или запросите новое письмо с подтверждением.");
+            model.addAttribute("error",
+                    "Аккаунт не подтвержден. Пожалуйста, проверьте почту или запросите новое письмо с подтверждением.");
         } else if (error != null) {
             if (!model.containsAttribute("error")) {
                 model.addAttribute("error", "Неверное имя пользователя или пароль");
@@ -41,18 +41,4 @@ public class AuthController {
         }
         return "login";
     }
-
-//    @PostMapping("/resend-verification")
-//    public String resendVerification(@RequestParam("email") String email,
-//                                   RedirectAttributes redirectAttributes) {
-//        boolean sent = userService.resendVerificationEmail(email);
-//        if (sent) {
-//            redirectAttributes.addFlashAttribute("success",
-//                "Новое письмо с подтверждением отправлено на вашу почту.");
-//        } else {
-//            redirectAttributes.addFlashAttribute("error",
-//                "Не удалось отправить письмо. Пожалуйста, проверьте email или обратитесь в поддержку.");
-//        }
-//        return "redirect:/auth/login";
-//    }
-} 
+}
