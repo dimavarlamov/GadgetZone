@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои товары</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <style>
+        /* Стили для адаптивной сетки */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            background: white;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        .product-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-add {
+            background: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            margin: 20px 0;
+        }
+
+        .search-box {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .pagination {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .pagination a {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .pagination a.active {
+            background: #2196F3;
+            color: white;
+            border-color: #2196F3;
+        }
+
+        .alert {
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 5px;
+    }
+    .alert.success {
+        background: #dff0d8;
+        color: #3c763d;
+        border: 1px solid #d6e9c6;
+    }
+    .alert.error {
+        background: #f2dede;
+        color: #a94442;
+        border: 1px solid #ebccd1;
+    }
+    </style>
+</head>
+<body>
+<a th:href="@{/seller/dashboard}" class="btn top-left-button">← Назад</a>
+<a th:href="@{/seller/my-products/add}" class="btn btn-add top-right-button">+ Добавить товар</a>
+
+<div class="container">
+    <h1>Управление товарами</h1>
+
+    <!-- Поиск -->
+    <form th:action="@{/seller/my-products}" method="get" class="search-box">
+        <input type="text" name="search" placeholder="Поиск по названию..."
+               th:value="${search}" class="search-input">
+        <button type="submit" class="btn">Найти</button>
+    </form>
+
+    <!-- Список товаров -->
+    <div class="products-grid">
+        <div th:each="product : ${products}" class="product-card">
+            <a th:href="@{/seller/my-products/details/{id}(id=${product.id})}" class="product-link">
+                <img th:src="@{${product.imageUrl}}" class="product-image" alt="Изображение товара">
+                <h3 th:text="${product.name}"></h3>
+                <p th:text="'Цена: ' + ${#numbers.formatDecimal(product.price, 1, 2)} + ' ₽'"></p>
+                <p th:text="'Остаток: ' + ${product.stock}"></p>
+            </a>
+
+            <!-- Кнопки действий -->
+            <div class="product-actions">
+                <a th:href="@{/seller/my-products/edit/{id}(id=${product.id})}"
+                   class="btn btn-edit">Редактировать</a>
+                <form th:action="@{/seller/my-products/delete/{id}(id=${product.id})}"
+                      method="post"
+                      onsubmit="return confirm('Удалить товар?')">
+                    <button type="submit" class="btn btn-delete">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Пагинация -->
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+           th:href="@{/seller/my-products(search=${search}, page=${i})}"
+           th:text="${i}"
+           th:classappend="${i == currentPage} ? 'active'"></a>
+    </div>
+
+    <!-- Сообщения об ошибках/успехе -->
+    <div th:if="${param.success}" class="alert success">
+        Товар успешно удалён!
+    </div>
+    <div th:if="${param.error}" class="alert error">
+        Ошибка: Невозможно удалить товар с существующими заказами
+    </div>
+</div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.GadgetZone.controllers;
 
 import com.GadgetZone.entity.User;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -32,5 +33,11 @@ public class UserController {
     public String createUser(@Valid @ModelAttribute User user) {
         userService.register(user);
         return "redirect:/login";
+    }
+
+    @GetMapping("/profile")
+    public String profile(@AuthenticationPrincipal User user, Model model) {
+        model.addAttribute("user", user);
+        return "profile";
     }
 }

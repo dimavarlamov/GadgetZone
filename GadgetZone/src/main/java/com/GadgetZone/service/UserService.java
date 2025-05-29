@@ -92,13 +92,6 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    @Transactional
-    public void updateUserBalance(Long userId, BigDecimal amount) {
-        User user = getUserById(userId);
-        user.setBalance(user.getBalance().add(amount));
-        userRepository.save(user);
-    }
-
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -123,4 +116,11 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    @Transactional
+    public void updateUserBalance(Long userId, BigDecimal amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        user.setBalance(amount);
+        userRepository.save(user);
+    }
 }

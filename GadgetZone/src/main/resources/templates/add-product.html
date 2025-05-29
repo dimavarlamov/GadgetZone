@@ -1,47 +1,70 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Избранное</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Добавить товар</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
+<a href="/seller/my-products" class="top-left-button">← Назад</a>
+<div class="container">
+    <h1>Добавить новый товар</h1>
 
-<header class="header">
-    <div class="nav">
-        <div class="logo">
-            <a th:href="@{/}"><img src="/images/logo.png" alt="GadgetZone Logo" /></a>
+    <!-- Success Message -->
+    <div th:if="${success}" class="success-message" th:text="${success}"></div>
+
+    <!-- Error Message -->
+    <div th:if="${error}" class="error-message" th:text="${error}"></div>
+
+    <form th:action="@{/seller/my-products/add}" th:object="${product}" method="post" enctype="multipart/form-data">
+        <!-- Name -->
+        <div class="form-group">
+            <label for="name">Название:</label>
+            <input type="text" th:field="*{name}" id="name" class="form-control" required>
+            <div th:errors="*{name}" class="error"></div>
         </div>
-        <ul class="nav-menu">
-            <li><a class="nav-link" th:href="@{/profile}">Профиль</a></li>
-            <li><a class="nav-link" th:href="@{/orders}">Заказы</a></li>
-            <li><a class="nav-link" th:href="@{/favorites}">Избранное</a></li>
-            <li><a class="nav-link" th:href="@{/cart}">Корзина</a></li>
-        </ul>
-    </div>
-</header>
 
-<main>
-    <h2 style="text-align: center; margin: 30px 0; color: var(--primary-color);">Мои избранные товары</h2>
-
-    <div th:if="${favorites.isEmpty()}" class="centered-container">
-        <p style="font-size: 18px; color: #555;">У вас пока нет избранных товаров.</p>
-    </div>
-
-    <div class="product-grid">
-        <div class="product-card" th:each="product : ${favorites}">
-            <img th:src="${product.imageUrl}" alt="Product Image" class="product-img">
-            <h3 th:text="${product.name}">Название</h3>
-            <p class="price" th:text="${product.price} + ' ₽'">Цена</p>
-
-            <form th:action="@{/favorites/toggle}" method="post">
-                <input type="hidden" name="productId" th:value="${product.id}" />
-                <button type="submit" class="btn" style="background-color: #d9534f;">Удалить из избранного</button>
-            </form>
+        <!-- Description -->
+        <div class="form-group">
+            <label for="description">Описание:</label>
+            <textarea th:field="*{description}" id="description" class="form-control"></textarea>
+            <div th:errors="*{description}" class="error"></div>
         </div>
-    </div>
 
-</main>
+        <!-- Price -->
+        <div class="form-group">
+            <label for="price">Цена (₽):</label>
+            <input type="number" th:field="*{price}" id="price" step="0.01" min="0" class="form-control" required>
+            <div th:errors="*{price}" class="error"></div>
+        </div>
 
+        <!-- Stock -->
+        <div class="form-group">
+            <label for="stock">Количество на складе:</label>
+            <input type="number" th:field="*{stock}" id="stock" min="0" class="form-control" required>
+            <div th:errors="*{stock}" class="error"></div>
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+            <label for="category">Категория:</label>
+            <select th:field="*{category.id}" id="category" class="form-control" required>
+                <option value="">Выберите категорию</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.title}"></option>
+            </select>
+            <div th:errors="*{category.id}" class="error"></div>
+        </div>
+
+        <!-- Image -->
+        <div class="form-group">
+            <label for="image">Изображение:</label>
+            <input type="file" id="image" name="image" accept="image/*" class="form-control" required>
+            <div th:if="${error != null && error.contains('изображение')}" class="error" th:text="${error}"></div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn">Добавить товар</button>
+    </form>
+</div>
 </body>
 </html>

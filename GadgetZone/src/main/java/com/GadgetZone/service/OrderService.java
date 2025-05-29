@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,44 +17,42 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
     private final ProductRepository productRepository;
 
-    // Создание нового заказа
     @Transactional
-    public Order createOrder(Long userId, String deliveryAddress) {
-        // Получаем пользователя по ID
+    public Order createOrder(Long userId, List<CartItem> cartItems, String deliveryAddress) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        // Получаем товары из корзины пользователя через сервис корзины
-        List<CartItem> cartItems = cartService.getCartItems(userId);
         validateCart(cartItems);
 
-        // Строим заказ
         Order order = buildOrder(user, deliveryAddress, cartItems);
-        processOrder(user, order);
+        processOrderItems(user, order, cartItems); // Передаём user вместо userId
 
-        // Сохраняем заказ через репозиторий JDBC
         return orderRepository.save(order);
     }
 
-    // Проверка, купил ли пользователь товар
+    private void processOrderItems(User user, Order order, List<CartItem> cartItems) {
+        cartItems.forEach(item -> cartService.removeFromCart(user.getId(), item.getProductId())); // Используем user.getId()
+        checkUserBalance(user, order.getTotalAmount());
+        updateProductStock(order.getItems());
+        deductUserBalance(user, order.getTotalAmount());
+    }
+
     public boolean hasUserPurchasedProduct(Long userId, Long productId) {
         return orderRepository.existsByUserAndProduct(userId, productId);
     }
 
-    // Проверка корзины пользователя
     private void validateCart(List<CartItem> cartItems) {
         if (cartItems.isEmpty()) {
             throw new EmptyCartException();
         }
 
         cartItems.forEach(item -> {
-            Product product = productRepository.findById(item.getProduct().getId())
+            Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(ProductNotFoundException::new);
 
             if (product.getStock() < item.getQuantity()) {
@@ -64,7 +61,6 @@ public class OrderService {
         });
     }
 
-    // Строим заказ
     private Order buildOrder(User user, String address, List<CartItem> cartItems) {
         return Order.builder()
                 .user(user)
@@ -76,32 +72,35 @@ public class OrderService {
                 .build();
     }
 
-    // Преобразуем элементы корзины в элементы заказа
     private List<OrderItem> convertToOrderItems(List<CartItem> cartItems) {
         return cartItems.stream()
-                .map(item -> new OrderItem(item.getProduct(), item.getQuantity()))
+                .map(item -> {
+                    Product product = productRepository.findById(item.getProductId())
+                            .orElseThrow(ProductNotFoundException::new);
+                    return new OrderItem(product, item.getQuantity());
+                })
                 .collect(Collectors.toList());
     }
 
-    // Получаем заказ по ID пользователя
     public Order getOrderForUser(Long orderId, Long userId) {
         return orderRepository.findByIdAndUserId(orderId, userId)
-                .orElseThrow(() -> new UserNotFoundException());
+                .orElseThrow(() -> new ProductNotFoundException("Order not found"));
     }
 
-    // Получаем все заказы пользователя
     public List<Order> getOrdersByUserId(Long userId) {
         return orderRepository.findByUserId(userId);
     }
 
-    // Вычисляем общую сумму заказа
     private BigDecimal calculateTotal(List<CartItem> items) {
         return items.stream()
-                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .map(item -> {
+                    Product product = productRepository.findById(item.getProductId())
+                            .orElseThrow(ProductNotFoundException::new);
+                    return product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Обрабатываем заказ
     private void processOrder(User user, Order order) {
         checkUserBalance(user, order.getTotalAmount());
         updateProductStock(order.getItems());
@@ -109,25 +108,34 @@ public class OrderService {
         deductUserBalance(user, order.getTotalAmount());
     }
 
-    // Проверка баланса пользователя
     private void checkUserBalance(User user, BigDecimal amount) {
         if (user.getBalance().compareTo(amount) < 0) {
             throw new InsufficientFundsException();
         }
     }
 
-    // Обновляем остатки товаров
     private void updateProductStock(List<OrderItem> items) {
         items.forEach(item -> {
             Product product = item.getProduct();
             product.setStock(product.getStock() - item.getQuantity());
-            productRepository.save(product); // Используется JDBC для сохранения данных о товаре
+            productRepository.save(product);
         });
     }
 
-    // Списание средств с баланса пользователя
     private void deductUserBalance(User user, BigDecimal amount) {
         user.setBalance(user.getBalance().subtract(amount));
-        userRepository.save(user); // Используется JDBC для сохранения пользователя
+        userRepository.save(user);
+    }
+
+    public List<Order> getOrdersBySeller(Long sellerId) {
+        return orderRepository.findBySellerId(sellerId);
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ProductNotFoundException("Order not found"));
+        order.setStatus(status);
+        orderRepository.save(order);
     }
 }

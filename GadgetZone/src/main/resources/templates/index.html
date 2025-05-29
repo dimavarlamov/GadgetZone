@@ -3,48 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
     <title>GadgetZone - Главная</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .filter-container { position: relative; margin-left: 1rem; }
+        .filter-button { padding: 0.8rem 1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1rem; transition: background-color 0.3s; }
+        .filter-button:hover { background-color: var(--secondary-color); }
+        .filter-form { display: none; position: absolute; top: 100%; left: 0; background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--box-shadow); z-index: 1000; min-width: 250px; }
+        .filter-form.active { display: block; }
+        .filter-form label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-color); }
+        .filter-form select, .filter-form input[type="number"] { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: var(--border-radius); font-size: 1rem; }
+        .filter-form .button-group { display: flex; gap: 1rem; }
+        .filter-form button { flex: 1; padding: 0.8rem; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1rem; transition: background-color 0.3s; }
+        .filter-form .apply-btn { background-color: var(--primary-color); color: white; }
+        .filter-form .apply-btn:hover { background-color: var(--secondary-color); }
+        .filter-form .reset-btn { background-color: #dc3545; color: white; }
+        .filter-form .reset-btn:hover { background-color: #c82333; }
+        .pagination { display: flex; justify-content: center; gap: 0.5rem; margin: 2rem 0; }
+        .pagination a { padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: var(--border-radius); text-decoration: none; color: var(--text-color); transition: background-color 0.3s; }
+        .pagination a:hover { background-color: var(--primary-color); color: white; }
+        .pagination a.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .favorite-btn { position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #ccc; transition: color 0.3s; }
+        .favorite-btn.active { color: #dc3545; }
+        .product-card { position: relative; }
+        .product-card a { text-decoration: none; color: inherit; }
+        .nav-search { display: flex; align-items: center; flex: 1; min-width: 250px; }
+        .cart-controls { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .cart-btn { padding: 0.8rem 1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; transition: background-color 0.3s; }
+        .cart-btn:hover { background-color: var(--secondary-color); }
+        .quantity-controls { display: flex; align-items: center; gap: 0.5rem; }
+        .quantity-btn { padding: 0.5rem; background-color: #f0f0f0; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1rem; }
+        .quantity-btn:hover { background-color: #ddd; }
+        .quantity-display { font-size: 1rem; color: var(--text-color); }
+        @media (max-width: 768px) {
+            .nav-search { flex-wrap: wrap; }
+            .filter-container { margin-top: 1rem; width: 100%; }
+            .filter-form { position: static; width: 100%; }
+            .filter-form .button-group { flex-direction: column; }
+        }
+    </style>
 </head>
 <body>
-    <header class="header">
-        <nav class="nav">
-            <a href="/" class="logo">
-<!--                 <img src="/GadgetZone/src/main/resources/static/images/logo.jpg" alt="Логотип GadgetZone">-->
-                <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img">
-            </a>    
-            
-            <div class="nav-search">
-                <input type="text" placeholder="Поиск товаров..." class="search-input">
-                <button class="search-button">Найти</button>
+<header class="header">
+    <nav class="nav">
+        <a href="/" class="logo">
+            <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img">
+        </a>
+        <div class="nav-search">
+            <form th:action="@{/}" method="get" class="search-form">
+                <input type="text" name="search" th:value="${searchQuery}" placeholder="Поиск товаров..." class="search-input">
+                <button type="submit" class="cart-btn">Найти</button>
+            </form>
+            <div class="filter-container">
+                <button class="filter-button">Фильтры</button>
+                <form th:action="@{/}" method="get" class="filter-form" id="filter-form">
+                    <label for="category">Категория:</label>
+                    <select name="category" id="category">
+                        <option value="">Все категории</option>
+                        <option th:each="category : ${categories}"
+                                th:value="${category.title}"
+                                th:text="${category.title}"
+                                th:selected="${category.title == param.category}"></option>
+                    </select>
+                    <label for="minPrice">Минимальная цена:</label>
+                    <input type="number" name="minPrice" id="minPrice" min="0" th:value="${param.minPrice}">
+                    <label for="maxPrice">Максимальная цена:</label>
+                    <input type="number" name="maxPrice" id="maxPrice" min="0" th:value="${param.maxPrice}">
+                    <div class="button-group">
+                        <button type="submit" class="apply-btn">Применить</button>
+                        <button type="button" class="reset-btn" onclick="window.location.href='/'">Сбросить</button>
+                    </div>
+                </form>
             </div>
-
-            <ul class="nav-menu">
-                <li><a href="/profile" class="nav-link">Профиль</a></li>
-                <li><a href="/orders" class="nav-link">Заказы</a></li>
-                <li><a href="/favorites" class="nav-link">Избранное</a></li>
-                <li>
-                    <a href="/cart" class="nav-link cart-link">
-                        Корзина
-                        <span class="cart-count" th:text="${cartCount}">0</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </header>
-
-    <main>
-        <div class="product-grid">
-            <div th:each="product : ${products}" class="product-card">
-                <img th:src="@{'/images/' + ${product.imageUrl}}" alt="Товар" class="product-img">
+        </div>
+        <ul class="nav-menu">
+            <li><a href="/profile" class="nav-link">Профиль</a></li>
+            <li><a href="/orders" class="nav-link">Заказы</a></li>
+            <li><a href="/favorites" class="nav-link">Избранное</a></li>
+            <li>
+                <a href="/cart" class="nav-link cart-link">
+                    Корзина
+                    <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}"></span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <div class="product-grid">
+        <div th:each="product : ${products}" class="product-card">
+            <a th:href="@{/products/details/{id}(id=${product.id})}">
+                <img th:src="@{${product.imageUrl}}" class="product-image" th:alt="${product.name}">
                 <h3 th:text="${product.name}"></h3>
-                <p class="price" th:text="${'Цена: ' + product.price + ' ₽'}"></p>
-                <button class="btn">Купить</button>
+                <p class="price" th:text="${product.price + ' ₽'}"></p>
+            </a>
+            <form th:action="@{/favorites/toggle}" method="post">
+                <input type="hidden" name="productId" th:value="${product.id}">
+                <button type="submit" class="favorite-btn"
+                        th:classappend="${favoriteStatus.get(product.id) ? 'active' : ''}">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </form>
+            <div class="cart-controls">
+                <div th:if="${cartQuantities != null and cartQuantities.get(product.id) != null}">
+                    <div class="quantity-controls">
+                        <button class="quantity-btn decrease" th:data-product-id="${product.id}">-</button>
+                        <span class="quantity-display" th:text="${cartQuantities.get(product.id)}"></span>
+                        <button class="quantity-btn increase" th:data-product-id="${product.id}">+</button>
+                    </div>
+                </div>
+                <div th:unless="${cartQuantities != null and cartQuantities.get(product.id) != null}">
+                    <form class="add-to-cart-form" th:data-product-id="${product.id}">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <button type="submit" class="cart-btn">Добавить в корзину</button>
+                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    </form>
+                </div>
             </div>
-        </div>    
-    </main>
+        </div>
+        <div th:if="${products.isEmpty()}" class="no-products">
+            <p>Товары не найдены</p>
+        </div>
+    </div>
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+           th:href="@{/(page=${i-1},search=${searchQuery},category=${category},minPrice=${minPrice},maxPrice=${maxPrice})}"
+           th:class="${currentPage == i} ? 'active'"
+           th:text="${i}"></a>
+    </div>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
-    <script th:src="@{/js/main.js}"></script>
+        // Toggle filter form
+        document.querySelector('.filter-button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelector('.filter-form').classList.toggle('active');
+        });
+
+        document.addEventListener('click', (event) => {
+            const filterContainer = document.querySelector('.filter-container');
+            if (!filterContainer.contains(event.target)) {
+                document.querySelector('.filter-form').classList.remove('active');
+            }
+        });
+
+        // Validate filter form
+        document.getElementById('filter-form').addEventListener('submit', (e) => {
+            const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+            if (minPrice > maxPrice) {
+                e.preventDefault();
+                alert('Минимальная цена не может быть больше максимальной');
+            }
+        });
+
+        // Add to cart
+        document.querySelectorAll('.add-to-cart-form').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const productId = form.getAttribute('data-product-id');
+                const formData = new FormData(form);
+                const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader] = csrfToken;
+                }
+                try {
+                    const response = await fetch('/cart/add', {
+                        method: 'POST',
+                        body: formData,
+                        headers
+                    });
+                    const result = await response.json();
+                    if (result.success && result.cartItemId) {
+                        form.outerHTML = `
+                            <div class="quantity-controls">
+                                <button class="quantity-btn decrease" data-cart-item-id="${result.cartItemId}">-</button>
+                                <span class="quantity-display">${result.quantity}</span>
+                                <button class="quantity-btn increase" data-cart-item-id="${result.cartItemId}">+</button>
+                            </div>`;
+                        updateCartCount(result.cartCount);
+                        alert('Товар добавлен в корзину');
+                    } else {
+                        alert(result.message || 'Ошибка при добавлении в корзину');
+                    }
+                } catch (error) {
+                    console.error('Error adding to cart:', error);
+                    alert('Произошла ошибка');
+                }
+            });
+        });
+
+        // Update quantity
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('quantity-btn')) {
+                e.preventDefault();
+                const cartItemId = e.target.getAttribute('data-cart-item-id');
+                if (!cartItemId || cartItemId === 'null') {
+                    alert('Неверный ID элемента корзины. Пожалуйста, добавьте товар в корзину снова.');
+                    return;
+                }
+                const isIncrease = e.target.classList.contains('increase');
+                const formData = new FormData();
+                formData.append('cartItemId', cartItemId);
+                formData.append('increment', isIncrease ? 1 : -1);
+                const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader] = csrfToken;
+                }
+                try {
+                    const response = await fetch('/cart/update', {
+                        method: 'POST',
+                        body: formData,
+                        headers
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        const container = e.target.closest('.quantity-controls');
+                        const display = container.querySelector('.quantity-display');
+                        display.textContent = result.quantity;
+                        updateCartCount(result.cartCount);
+                        if (result.quantity === 0) {
+                            container.outerHTML = `
+                                <form class="add-to-cart-form" data-product-id="${result.productId}">
+                                    <input type="hidden" name="productId" value="${result.productId}">
+                                    <button type="submit" class="cart-btn">Добавить в корзину</button>
+                                    ${csrfToken ? `<input type="hidden" name="_csrf" value="${csrfToken}">` : ''}
+                                </form>`;
+                        }
+                    } else {
+                        alert(result.message || 'Ошибка при обновлении количества');
+                    }
+                } catch (error) {
+                    console.error('Error updating quantity:', error);
+                    alert('Произошла ошибка');
+                }
+            }
+        });
+
+        function updateCartCount(count) {
+            document.querySelector('.cart-count').textContent = count;
+        }
+    });
+</script>
 </body>
 </html>

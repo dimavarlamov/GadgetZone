@@ -4,9 +4,193 @@
     <meta charset="UTF-8">
     <title>Управление категориями</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        :root {
+            --primary-color: rgb(67, 0, 78);
+            --secondary-color: #543958;
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .top-left-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: var(--box-shadow);
+            transition: background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        .top-left-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .category-management {
+            max-width: 800px;
+            margin: 60px auto 20px;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        h1 {
+            text-align: center;
+            margin: 40px 0 30px;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .category-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .category-form input[type="text"] {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .category-form input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(67, 0, 78, 0.3);
+        }
+
+        .auth-button {
+            padding: 0.8rem 1.5rem;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .auth-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border: 1px solid #f5c2c7;
+            border-radius: var(--border-radius);
+        }
+
+        .category-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+
+        .category-table th,
+        .category-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        .category-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .category-table td {
+            background-color: white;
+        }
+
+        .category-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .btn.edit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn.edit-btn:hover {
+            background-color: #4a148c;
+        }
+
+        .btn.delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn.delete-btn:hover {
+            background-color: #4a148c;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .category-management {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .category-form {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .category-form input[type="text"],
+            .auth-button {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+
+            .category-table th,
+            .category-table td {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<a th:href="@{/seller/products}" class="top-left-button">← К товарам</a>
+<a th:href="@{/seller/dashboard}" class="top-left-button">← Назад</a>
 
 <div class="category-management">
     <h1>Управление категориями</h1>
@@ -36,8 +220,10 @@
         <tr th:each="category : ${categories}">
             <td th:text="${category.title}"></td>
             <td>
-                <a th:href="@{/seller/categories/edit/{id}(id=${category.id})}" class="btn">✏️</a>
-                <a th:href="@{/seller/categories/delete/{id}(id=${category.id})}" class="btn delete-btn">❌</a>
+                <a th:href="@{/seller/categories/edit/{id}(id=${category.id})}" class="btn edit-btn">✏️</a>
+                <form th:action="@{/seller/categories/delete/{id}(id=${category.id})}" method="post" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить эту категорию?');">
+                    <button type="submit" class="btn delete-btn">❌</button>
+                </form>
             </td>
         </tr>
         </tbody>

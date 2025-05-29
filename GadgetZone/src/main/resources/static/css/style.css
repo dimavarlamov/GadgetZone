@@ -629,3 +629,209 @@ h1 {
     margin-top: 0;
     color: var(--primary-color);
 }
+
+/* seller-dashboard.css */
+.dashboard-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+.dashboard-links .btn {
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    transition: transform 0.2s;
+    background-color: #6a1b9a;
+    color: white;
+    text-decoration: none;
+}
+
+.dashboard-links .btn:hover {
+    transform: translateY(-3px);
+    background-color: #4a148c;
+}
+
+.manage-table {
+    width: 100%;
+    margin-top: 2rem;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.manage-table th,
+.manage-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.product-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.stock-input {
+    width: 70px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.small-btn {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Стили для панели управления */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.dashboard-card h3 {
+    margin: 0 0 1rem 0;
+    color: #6a1b9a;
+}
+
+.dashboard-card p {
+    margin: 0;
+    color: #666;
+}
+
+/* Add to style.css */
+.filter-container {
+    position: relative;
+    margin-left: 1rem;
+}
+
+.filter-button {
+    padding: 0.8rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.filter-button:hover {
+    background-color: var(--secondary-color);
+}
+
+.filter-form {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    z-index: 1000;
+    min-width: 250px;
+}
+
+.filter-form.active {
+    display: block;
+}
+
+.filter-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.filter-form select,
+.filter-form input[type="number"] {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+.filter-form button {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.filter-form button:hover {
+    background-color: var(--secondary-color);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+}
+
+.pagination a {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    color: var(--text-color);
+    transition: background-color 0.3s;
+}
+
+.pagination a:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.pagination a.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .filter-container {
+        margin-top: 1rem;
+        width: 100%;
+    }
+
+    .filter-form {
+        position: static;
+        width: 100%;
+    }
+}

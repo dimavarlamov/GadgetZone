@@ -1,87 +1,84 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <meta charset="UTF-8">
   <title>Редактировать товар</title>
-  <meta charset="UTF-8"/>
-  <link rel="stylesheet" href="/css/styles.css"/>
-  <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 40px;
-        background-color: #f4f4f4;
-    }
-
-    h1 {
-        color: #333;
-    }
-
-    form {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 600px;
-    }
-
-    label {
-        display: block;
-        margin-top: 15px;
-        font-weight: bold;
-    }
-
-    input[type="text"], input[type="number"], textarea {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    button {
-        margin-top: 20px;
-        padding: 10px 20px;
-        background-color: #2196F3;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .error {
-        color: red;
-        font-size: 0.9em;
-    }
-  </style>
+  <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
+<a href="/seller/my-products" class="top-left-button">← Назад</a>
+<div class="container">
+  <h1>Редактировать товар</h1>
 
-<h1>Редактировать товар</h1>
+  <!-- Success Message -->
+  <div th:if="${success}" class="success-message" th:text="${success}"></div>
 
-<form th:action="@{/seller/products/edit}" method="post" th:object="${product}">
-  <input type="hidden" th:field="*{id}"/>
+  <!-- Error Message -->
+  <div th:if="${error}" class="error-message" th:text="${error}"></div>
 
-  <label for="name">Название:</label>
-  <input type="text" id="name" th:field="*{name}" required/>
-  <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+  <form th:action="@{/seller/my-products/edit/{id}(id=${product.id})}" th:object="${product}" method="post" enctype="multipart/form-data">
+    <!-- Hidden Image URL -->
+    <input type="hidden" th:field="*{imageUrl}" />
 
-  <label for="description">Описание:</label>
-  <textarea id="description" th:field="*{description}" required></textarea>
-  <div class="error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+    <!-- Name -->
+    <div class="form-group">
+      <label for="name">Название:</label>
+      <input type="text" th:field="*{name}" id="name" class="form-control" required>
+      <div th:errors="*{name}" class="error"></div>
+    </div>
 
-  <label for="price">Цена:</label>
-  <input type="number" id="price" step="0.01" th:field="*{price}" required/>
-  <div class="error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description">Описание:</label>
+      <textarea th:field="*{description}" id="description" class="form-control"></textarea>
+      <div th:errors="*{description}" class="error"></div>
+    </div>
 
-  <label for="stock">Количество на складе:</label>
-  <input type="number" id="stock" th:field="*{stock}" required/>
-  <div class="error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
+    <!-- Price -->
+    <div class="form-group">
+      <label for="price">Цена (₽):</label>
+      <input type="number" th:field="*{price}" id="price" step="0.01" min="0" class="form-control" required>
+      <div th:errors="*{price}" class="error"></div>
+    </div>
 
-  <label for="imageUrl">URL изображения:</label>
-  <input type="text" id="imageUrl" th:field="*{imageUrl}" required/>
-  <div class="error" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}"></div>
+    <!-- Stock -->
+    <div class="form-group">
+      <label for="stock">Количество на складе:</label>
+      <input type="number" th:field="*{stock}" id="stock" min="0" class="form-control" required>
+      <div th:errors="*{stock}" class="error"></div>
+    </div>
 
-  <button type="submit">Обновить</button>
-</form>
+    <!-- Category -->
+    <div class="form-group">
+      <label for="category">Категория:</label>
+      <select th:field="*{category.id}" id="category" class="form-control" required>
+        <option value="">Выберите категорию</option>
+        <option th:each="cat : ${categories}"
+                th:value="${cat.id}"
+                th:text="${cat.title}"
+                th:selected="${cat.id == product.category.id}">
+        </option>
+      </select>
+      <div th:errors="*{category.id}" class="error"></div>
+    </div>
 
+    <!-- Current Image -->
+    <div class="form-group">
+      <label>Текущее изображение:</label>
+      <img th:if="${product.imageUrl != null}" th:src="@{${product.imageUrl}}" class="product-thumb" alt="Product Image">
+      <span th:if="${product.imageUrl == null}">Изображение отсутствует</span>
+    </div>
+
+    <!-- New Image (Optional) -->
+    <div class="form-group">
+      <label for="image">Новое изображение (опционально):</label>
+      <input type="file" id="image" name="image" accept="image/*" class="form-control">
+      <div th:if="${error != null && error.contains('изображение')}" class="error" th:text="${error}"></div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn">Сохранить изменения</button>
+  </form>
+</div>
 </body>
 </html>
-

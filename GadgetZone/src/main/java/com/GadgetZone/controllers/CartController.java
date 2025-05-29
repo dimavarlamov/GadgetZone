@@ -1,59 +1,230 @@
 package com.GadgetZone.controllers;
 
 import com.GadgetZone.entity.CartItem;
+import com.GadgetZone.entity.Order;
 import com.GadgetZone.entity.User;
 import com.GadgetZone.exceptions.InsufficientStockException;
 import com.GadgetZone.service.CartService;
-import com.GadgetZone.repository.UserRepository;
-
 import com.GadgetZone.service.FavoriteService;
+import com.GadgetZone.service.OrderService;
+import com.GadgetZone.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/cart")
 @RequiredArgsConstructor
 public class CartController {
-
     private final CartService cartService;
     private final FavoriteService favoriteService;
+    private final OrderService orderService;
+    private final UserService userService; // Added missing dependency
+    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
 
-    @PostMapping("/add/{productId}")
-    public String addToCart(@PathVariable Long productId,
-                            @RequestParam(defaultValue = "1") int quantity,
-                            @AuthenticationPrincipal User user,
-                            RedirectAttributes attributes) {
-        try {
-            cartService.addToCart(user.getId(), productId, quantity);
-            attributes.addFlashAttribute("success", "Товар добавлен в корзину");
-        } catch (InsufficientStockException e) {
-            attributes.addFlashAttribute("error", e.getMessage());
+    @PostMapping("/add")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> addToCart(
+            @RequestParam Long productId,
+            @RequestParam(defaultValue = "1") int quantity,
+            Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            response.put("success", false);
+            response.put("message", "Требуется авторизация");
+            return ResponseEntity.status(401).body(response);
         }
-        return "redirect:/products/" + productId;
+
+        try {
+            User user = getAuthenticatedUser(authentication);
+            CartItem item = cartService.addToCart(user.getId(), productId, quantity);
+            if (item.getId() == null) {
+                throw new RuntimeException("Failed to generate cart item ID");
+            }
+            response.put("success", true);
+            response.put("quantity", item.getQuantity());
+            response.put("cartItemId", item.getId());
+            response.put("productId", productId);
+            response.put("cartCount", cartService.getCartCount(user.getId()));
+            logger.debug("Added to cart: userId={}, productId={}, quantity={}", user.getId(), productId, quantity);
+            return ResponseEntity.ok(response);
+        } catch (InsufficientStockException e) {
+            response.put("success", false);
+            response.put("message", "Недостаточно товара на складе");
+            return ResponseEntity.status(400).body(response);
+        } catch (Exception e) {
+            logger.error("Error adding to cart: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Ошибка при добавлении в корзину");
+            return ResponseEntity.status(500).body(response);
+        }
     }
 
-    @PostMapping("/remove/{productId}")
-    public String removeFromCart(@PathVariable Long productId,
-                                 @AuthenticationPrincipal User user,
-                                 RedirectAttributes attributes) {
-        cartService.removeFromCart(user.getId(), productId);
-        attributes.addFlashAttribute("success", "Товар удален из корзины");
-        return "redirect:/cart";
+    @PostMapping("/delete")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> removeFromCart(
+            @RequestParam Long cartItemId,
+            Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            response.put("success", false);
+            response.put("message", "Требуется авторизация");
+            return ResponseEntity.status(401).body(response);
+        }
+
+        try {
+            User user = getAuthenticatedUser(authentication);
+            cartService.removeFromCartById(user.getId(), cartItemId);
+            List<CartItem> items = cartService.getCartItems(user.getId());
+            response.put("success", true);
+            response.put("totalAmount", cartService.calculateTotal(items));
+            response.put("cartCount", cartService.getCartCount(user.getId()));
+            logger.debug("Removed from cart: userId={}, cartItemId={}", user.getId(), cartItemId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error removing from cart: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Ошибка при удалении из корзины");
+            return ResponseEntity.status(500).body(response);
+        }
     }
 
-    @PostMapping("/favorite/{productId}")
-    public String toggleFavorite(@PathVariable Long productId,
-                                 @AuthenticationPrincipal User user,
-                                 RedirectAttributes attributes) {
-        favoriteService.toggleFavorite(user.getId(), productId);
-        attributes.addFlashAttribute("success", "Избранное обновлено");
-        return "redirect:/products/" + productId;
+    @PostMapping("/update")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateQuantity(
+            @RequestParam Long cartItemId,
+            @RequestParam int increment,
+            Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            response.put("success", false);
+            response.put("message", "Требуется авторизация");
+            return ResponseEntity.status(401).body(response);
+        }
+
+        try {
+            User user = getAuthenticatedUser(authentication);
+            CartItem item = cartService.updateQuantity(user.getId(), cartItemId, increment);
+            List<CartItem> items = cartService.getCartItems(user.getId());
+            response.put("success", true);
+            response.put("quantity", item != null ? item.getQuantity() : 0);
+            response.put("totalAmount", cartService.calculateTotal(items));
+            response.put("cartCount", cartService.getCartCount(user.getId()));
+            if (item != null) {
+                response.put("item", Map.of("price", item.getProduct().getPrice()));
+            }
+            logger.debug("Updated quantity: userId={}, cartItemId={}, increment={}", user.getId(), cartItemId, increment);
+            return ResponseEntity.ok(response);
+        } catch (InsufficientStockException e) {
+            response.put("success", false);
+            response.put("message", "Недостаточно товара на складе");
+            return ResponseEntity.status(400).body(response);
+        } catch (Exception e) {
+            logger.error("Error updating quantity: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Ошибка при обновлении количества");
+            return ResponseEntity.status(500).body(response);
+        }
+    } // Added missing closing brace
+
+    @GetMapping
+    public String viewCart(Authentication authentication, Model model, RedirectAttributes attributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            attributes.addFlashAttribute("error", "Требуется авторизация");
+            return "redirect:/login";
+        }
+
+        try {
+            User user = getAuthenticatedUser(authentication);
+            List<CartItem> cartItems = cartService.getCartItems(user.getId());
+            BigDecimal total = cartService.calculateTotal(cartItems);
+            model.addAttribute("cartItems", cartItems);
+            model.addAttribute("total", total);
+            model.addAttribute("cartCount", cartService.getCartCount(user.getId()));
+            logger.debug("Viewing cart for userId={}: {} items", user.getId(), cartItems.size());
+            return "cart";
+        } catch (Exception e) {
+            logger.error("Error viewing cart: {}", e.getMessage());
+            attributes.addFlashAttribute("error", "Ошибка при загрузке корзины");
+            return "redirect:/";
+        }
+    }
+
+    @PostMapping("/checkout")
+    public String checkoutForm(@RequestParam List<Long> selectedIds, Authentication authentication, Model model, RedirectAttributes attributes) {
+        if (authentication == null || !authentication.isAuthenticated()) { // Fixed authentication check
+            attributes.addFlashAttribute("error", "Требуется авторизация");
+            return "redirect:/login";
+        }
+
+        try {
+            User user = getAuthenticatedUser(authentication);
+            List<CartItem> selectedItems = cartService.getSelectedItems(user.getId(), selectedIds);
+            if (selectedItems.isEmpty()) {
+                attributes.addFlashAttribute("error", "Выберите хотя бы один товар");
+                return "redirect:/cart";
+            }
+            BigDecimal total = cartService.calculateTotal(selectedItems);
+            String deliveryDateTime = LocalDateTime.now().plusDays(3).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+            model.addAttribute("selectedItems", selectedItems);
+            model.addAttribute("total", total);
+            model.addAttribute("deliveryDateTime", deliveryDateTime);
+            model.addAttribute("cartCount", cartService.getCartCount(user.getId()));
+            logger.debug("Checkout form for userId={}: {} items selected", user.getId(), selectedItems.size());
+            return "checkout";
+        } catch (Exception e) {
+            logger.error("Error preparing checkout: {}", e.getMessage());
+            attributes.addFlashAttribute("error", "Ошибка при оформлении заказа");
+            return "redirect:/cart";
+        }
+    }
+
+    @PostMapping("/order/place")
+    public String confirmOrder(
+            @RequestParam List<Long> selectedItems,
+            @RequestParam String deliveryAddress,
+            Authentication authentication,
+            RedirectAttributes attributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            attributes.addFlashAttribute("error", "Требуется авторизация");
+            return "redirect:/login";
+        }
+
+        try {
+            User user = getAuthenticatedUser(authentication);
+            List<CartItem> items = cartService.getSelectedItems(user.getId(), selectedItems);
+            if (items.isEmpty()) {
+                throw new Exception("Выберите хотя бы один товар");
+            }
+            Order order = orderService.createOrder(user.getId(), items, deliveryAddress);
+            attributes.addFlashAttribute("success", "Заказ успешно оформлен");
+            logger.info("Order confirmed: {} for userId={}", order.getId(), user.getId());
+            return "redirect:/orders/" + order.getId();
+        } catch (Exception e) {
+            logger.error("Error confirming order: {}", e.getMessage());
+            attributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/cart";
+        }
+    }
+
+    private User getAuthenticatedUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Требуется авторизация");
+        }
+        return userService.getUserByEmail(authentication.getName());
     }
 }

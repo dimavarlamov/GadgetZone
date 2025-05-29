@@ -21,13 +21,22 @@ public class FavoriteService {
 
     @Transactional
     public void toggleFavorite(Long userId, Long productId) {
-        if (favoriteRepository.existsByUserAndProduct(userId, productId)) {
-            favoriteRepository.deleteByUserAndProduct(userId, productId);
+        if (favoriteRepository.existsByUserIdAndProductId(userId, productId)) {
+            favoriteRepository.deleteByUserIdAndProductId(userId, productId);
         } else {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(ProductNotFoundException::new);
-            favoriteRepository.save(new Favorite(userId, product.getId()));
+            Favorite favorite = new Favorite();
+            favorite.setUserId(userId);
+            favorite.setProductId(productId);
+            favoriteRepository.save(favorite);
         }
+    }
+
+    public boolean isFavorite(Long userId, Long productId) {
+        return favoriteRepository.existsByUserIdAndProductId(userId, productId);
+    }
+
+    public List<Favorite> getFavoritesByUserId(Long userId) {
+        return favoriteRepository.findByUserId(userId);
     }
 
     @Transactional(readOnly = true)

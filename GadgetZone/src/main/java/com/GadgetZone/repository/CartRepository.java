@@ -3,6 +3,7 @@ package com.GadgetZone.repository;
 import com.GadgetZone.entity.CartItem;
 import com.GadgetZone.entity.Product;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -24,47 +25,63 @@ public class CartRepository {
         jdbc.update(sql, userId, productId, quantity);
     }
 
-    // Метод для получения всех товаров в корзине
-    public List<CartItem> findByUserId(Long userId) {
-        String sql = "SELECT ci.*, p.* FROM cart_items ci " +
-                "JOIN products p ON ci.product_id = p.id " +
-                "WHERE ci.user_id = ?";
-        return jdbc.query(sql, new CartItemRowMapper(), userId);
+    public void save(CartItem cartItem) {
+        if (cartItem.getId() == null) {
+            String sql = "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)";
+            jdbc.update(sql, cartItem.getUserId(), cartItem.getProductId(), cartItem.getQuantity());
+            // Retrieve the generated ID
+            Long id = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+            if (id == null) {
+                throw new RuntimeException("Failed to retrieve generated ID for cart item");
+            }
+            cartItem.setId(id);
+        } else {
+            String sql = "UPDATE cart_items SET quantity = ? WHERE id = ?";
+            jdbc.update(sql, cartItem.getQuantity(), cartItem.getId());
+        }
     }
 
-    // Метод для удаления товара из корзины
-    public void removeItem(Long userId, Long productId) {
+    public List<CartItem> findByUserId(Long userId) {
+        String sql = "SELECT * FROM cart_items WHERE user_id = ?";
+        return jdbc.query(sql, new Object[]{userId}, new BeanPropertyRowMapper<>(CartItem.class));
+    }
+
+    public void deleteByUserIdAndProductId(Long userId, Long productId) {
         String sql = "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
         jdbc.update(sql, userId, productId);
     }
 
-    // Метод для очистки корзины
-    public void clear(Long userId) {
+    public void deleteByUserId(Long userId) {
         String sql = "DELETE FROM cart_items WHERE user_id = ?";
         jdbc.update(sql, userId);
     }
 
-    // Метод для проверки существования товара в корзине
-    public boolean existsByUserAndProduct(Long userId, Long productId) {
+    public boolean existsByUserIdAndProductId(Long userId, Long productId) {
         String sql = "SELECT COUNT(*) FROM cart_items WHERE user_id = ? AND product_id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, userId, productId);
+        Integer count = jdbc.queryForObject(sql, new Object[]{userId, productId}, Integer.class);
         return count != null && count > 0;
     }
 
-    // Маппер для CartItem
+    public CartItem findByIdAndUserId(Long cartItemId, Long userId) {
+        String sql = "SELECT * FROM cart_items WHERE id = ? AND user_id = ?";
+        List<CartItem> items = jdbc.query(sql, new Object[]{cartItemId, userId}, new BeanPropertyRowMapper<>(CartItem.class));
+        return items.isEmpty() ? null : items.get(0);
+    }
+
+    public void deleteByIdAndUserId(Long cartItemId, Long userId) {
+        String sql = "DELETE FROM cart_items WHERE id = ? AND user_id = ?";
+        jdbc.update(sql, cartItemId, userId);
+    }
+
     private static class CartItemRowMapper implements RowMapper<CartItem> {
         @Override
         public CartItem mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Product product = Product.builder()
-                    .id(rs.getLong("product_id"))
-                    .name(rs.getString("name"))
-                    .price(rs.getBigDecimal("price"))
-                    .build();
-
-            return new CartItem(
-                    product,
-                    rs.getInt("quantity")
-            );
+            CartItem cartItem = new CartItem();
+            cartItem.setId(rs.getLong("id"));
+            cartItem.setUserId(rs.getLong("user_id"));
+            cartItem.setProductId(rs.getLong("product_id"));
+            cartItem.setQuantity(rs.getInt("quantity"));
+            return cartItem;
         }
     }
 }

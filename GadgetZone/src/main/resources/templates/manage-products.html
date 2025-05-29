@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои товары</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<a href="/manage/dashboard" class="top-left-button">← Назад</a>
+<div class="container">
+    <h1>Управление товарами</h1>
+
+    <a href="/products/add" class="btn">➕ Добавить товар</a>
+
+    <table class="manage-table">
+        <thead>
+        <tr>
+            <th>Фото</th>
+            <th>Название</th>
+            <th>Цена</th>
+            <th>Остаток</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+            <td><img th:src="${product.imageUrl}" class="product-thumb"></td>
+            <td th:text="${product.name}"></td>
+            <td th:text="${product.price} + ' ₽'"></td>
+            <td>
+                <form th:action="@{'/products/stock/' + ${product.id}}" method="post">
+                    <input type="number" th:value="${product.stock}"
+                           name="stock" min="0" class="stock-input">
+                    <button type="submit" class="small-btn">🔄</button>
+                </form>
+            </td>
+            <td>
+                <a th:href="@{'/products/edit/' + ${product.id}}" class="btn">✏️</a>
+                <form th:action="@{'/products/delete/' + ${product.id}}"
+                      method="post" style="display: inline-block;">
+                    <button type="submit" class="btn delete-btn">❌</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

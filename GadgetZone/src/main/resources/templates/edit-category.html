@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактирование категории</title>
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+<body>
+<a href="javascript:history.back()" class="top-left-button">← Назад</a>
+
+<div class="category-management">
+    <h1>Редактирование категории</h1>
+
+    <form class="category-form" th:action="@{/seller/categories/edit/{id}(id=${category.id})}" method="post" th:object="${category}">
+        <input type="hidden" th:field="*{id}"/>
+        <div th:if="${#fields.hasErrors('*')}" class="error">
+            <div th:each="err : ${#fields.errors('*')}" th:text="${err}"></div>
+        </div>
+
+        <input type="text"
+               th:field="*{title}"
+               placeholder="Название категории"
+               required>
+        <button type="submit" class="auth-button">Сохранить</button>
+    </form>
+</div>
+</body>
+</html>

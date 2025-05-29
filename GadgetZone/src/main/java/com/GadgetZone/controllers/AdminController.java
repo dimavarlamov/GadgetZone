@@ -14,7 +14,7 @@ import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
     private final UserService userService;
     private final StatisticsService statisticsService;
@@ -29,15 +29,6 @@ public class AdminController {
     public String userManagement(Model model) {
         model.addAttribute("users", userService.getAllUsers());
         return "admin-users";
-    }
-
-    @PostMapping("/users/{userId}/balance")
-    public String updateBalance(@PathVariable Long userId,
-                                @RequestParam BigDecimal amount,
-                                RedirectAttributes attributes) {
-        userService.updateUserBalance(userId, amount);
-        attributes.addFlashAttribute("success", "Баланс успешно обновлён");
-        return "redirect:/admin/users";
     }
 
     // Статистика продаж
@@ -57,9 +48,18 @@ public class AdminController {
         return "admin-statistics";
     }
 
-    // Главная панель админа
     @GetMapping("/dashboard")
     public String adminDashboard() {
         return "admin-dashboard";
     }
+
+    @PostMapping("/users/{userId}/balance")
+    public String updateBalance(@PathVariable Long userId,
+                                @RequestParam BigDecimal amount,
+                                RedirectAttributes attributes) {
+        userService.updateUserBalance(userId, amount);
+        attributes.addFlashAttribute("success", "Баланс успешно обновлён");
+        return "redirect:/admin/users";
+    }
+
 }

@@ -7,11 +7,28 @@
 </head>
 <body>
 <a href="/" class="top-left-button">← На главную</a>
-<h1>Панель управления продавца</h1>
+<h1>Управление магазином</h1>
 
-<div class="dashboard-links">
-    <a href="/seller/products" class="btn">🗃️ Мои товары</a>
-    <a href="/seller/categories/manage" class="btn">📂 Управление категориями</a>
+<div class="dashboard-grid">
+    <a th:href="@{/seller/my-products}" class="dashboard-card">
+        <h3>🗃️ Товары</h3>
+        <p>Управление товарными предложениями</p>
+    </a>
+
+    <a th:href="@{/seller/categories}" class="dashboard-card">
+        <h3>📂 Категории</h3>
+        <p>Настройка товарных категорий</p>
+    </a>
+
+    <a th:href="@{/seller/orders}" class="dashboard-card">
+        <h3>📦 Заказы</h3>
+        <p>Просмотр и обработка заказов</p>
+    </a>
+
+    <a th:href="@{/seller/statistics}" class="dashboard-card"> <!-- Поправил путь -->
+        <h3>📈 Аналитика</h3>
+        <p>Статистика продаж и доходов</p>
+    </a>
 </div>
 </body>
 </html>

@@ -18,7 +18,8 @@
             <p><strong>Роль:</strong> <span th:text="${user.role.name()}"></span></p>
 
             <div th:if="${user.role.name() == 'ROLE_SELLER' or user.role.name() == 'ROLE_ADMIN'}">
-                <a th:href="@{${dashboardLink}}" class="btn">Перейти в панель управления</a>
+                <a th:href="${user.role.name() == 'ROLE_SELLER' ? '/seller/dashboard' : '/admin/dashboard'}"
+                   class="btn">Перейти в панель управления</a>
             </div>
         </div>
 

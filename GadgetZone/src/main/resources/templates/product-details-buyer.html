@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name} + ' - GadgetZone'"></title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .product-details-container { max-width: 1200px; margin: 2rem auto; padding: 2rem; display: flex; gap: 2rem; }
+        .product-image-container { flex: 1; }
+        .product-image { max-width: 100%; height: auto; border-radius: var(--border-radius); }
+        .product-info { flex: 1; }
+        h1 { color: var(--primary-color); margin-bottom: 1rem; }
+        .price { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); margin: 1rem 0; }
+        .description { color: var(--text-color); margin-bottom: 1rem; }
+        .stock { color: #666; margin-bottom: 1rem; }
+        .action-btn { padding: 0.8rem 1.5rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1rem; transition: background-color 0.3s; margin-right: 1rem; }
+        .action-btn:hover { background-color: var(--secondary-color); }
+        .favorite-btn { background: transparent; color: #ccc; font-size: 1.5rem; }
+        .favorite-btn.active { color: #dc3545; }
+        .reviews-container { margin-top: 2rem; }
+        .review { background: #f9f9f9; padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem; }
+        .review-author { font-weight: bold; color: var(--primary-color); }
+        .review-date { color: #666; font-size: 0.9rem; }
+        .review-text { margin-top: 0.5rem; }
+        .cart-controls { display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+        .cart-btn { padding: 0.8rem 1.5rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; }
+        .cart-btn:hover { background-color: var(--secondary-color); }
+        .quantity-controls { display: flex; align-items: center; gap: 0.5rem; }
+        .quantity-btn { padding: 0.5rem; background-color: #f0f0f0; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1rem; }
+        .quantity-btn:hover { background-color: #ddd; }
+        .quantity-display { font-size: 1rem; color: var(--text-color); }
+        @media (max-width: 768px) {
+            .product-details-container { flex-direction: column; }
+            .action-btn { width: 100%; margin-bottom: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <nav class="nav">
+        <a href="/" class="logo">
+            <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img">
+        </a>
+        <div class="nav-search">
+            <form th:action="@{/}" method="get" class="search-form">
+                <input type="text" name="search" placeholder="Поиск товаров..." class="search-input">
+                <button type="submit" class="search-button">Найти</button>
+            </form>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="/profile" class="nav-link">Профиль</a></li>
+            <li><a href="/orders" class="nav-link">Заказы</a></li>
+            <li><a href="/favorites" class="nav-link">Избранное</a></li>
+            <li>
+                <a href="/cart" class="nav-link cart-link">
+                    Корзина
+                    <span class="cart-count" th:text="${cartCount ?: 0}">0</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <div class="product-details-container">
+        <div class="product-image-container">
+            <img th:src="@{${product.imageUrl}}" class="product-image" th:alt="${product.name}">
+        </div>
+        <div class="product-info">
+            <h1 th:text="${product.name}"></h1>
+            <p class="price" th:text="${'Цена: ' + product.price + ' ₽'}"></p>
+            <p class="description" th:text="${product.description}"></p>
+            <p class="stock" th:text="${'В наличии: ' + product.stock + ' шт.'}"></p>
+            <div class="cart-controls">
+                <div th:if="${cartQuantity == null}">
+                    <form class="add-to-cart-form" th:data-product-id="${product.id}">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <button type="submit" class="cart-btn">Добавить в корзину</button>
+                        <th:block th:if="${_csrf != null}">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        </th:block>
+                    </form>
+                </div>
+                <div th:if="${cartQuantity != null}" class="quantity-controls">
+                    <button class="quantity-btn decrease" th:data-product-id="${product.id}">-</button>
+                    <span class="quantity-display" th:text="${cartQuantity}"></span>
+                    <button class="quantity-btn increase" th:data-product-id="${product.id}">+</button>
+                </div>
+            </div>
+            <form th:action="@{/favorites/toggle}" method="post">
+                <input type="hidden" name="productId" th:value="${product.id}">
+                <button type="submit" class="action-btn favorite-btn" th:classappend="${isFavorite} ? 'active'">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="reviews-container" th:if="${not #lists.isEmpty(reviews)}">
+        <h2>Отзывы</h2>
+        <div th:each="review : ${reviews}" class="review">
+            <p class="review-author" th:text="${review.author}"></p>
+            <p class="review-date" th:text="${#temporals.format(review.createdAt, 'dd.MM.yyyy')}"></p>
+            <p class="review-text" th:text="${review.text}"></p>
+        </div>
+    </div>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Добавление в корзину
+        const addForm = document.querySelector('.add-to-cart-form');
+        if (addForm) {
+            addForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const productId = addForm.getAttribute('data-product-id');
+                const formData = new FormData(addForm);
+                try {
+                    const response = await fetch('/cart/add', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        addForm.outerHTML = `
+                            <div class="quantity-controls">
+                                <button class="quantity-btn decrease" data-product-id="${productId}">-</button>
+                                <span class="quantity-display">${result.quantity}</span>
+                                <button class="quantity-btn increase" data-product-id="${productId}">+</button>
+                            </div>`;
+                        updateCartCount(result.cartCount);
+                        alert('Товар добавлен в корзину');
+                    } else {
+                        alert(result.message || 'Ошибка при добавлении в корзину');
+                    }
+                } catch (error) {
+                    console.error('Error adding to cart:', error);
+                    alert('Произошла ошибка');
+                }
+            });
+        }
+
+        // Изменение количества
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('quantity-btn')) {
+                e.preventDefault();
+                const productId = e.target.getAttribute('data-product-id');
+                const isIncrease = e.target.classList.contains('increase');
+                try {
+                    const response = await fetch('/cart/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: `productId=${productId}&increment=${isIncrease ? 1 : -1}${document.querySelector('input[name="_csrf"]') ? '&_csrf=' + document.querySelector('input[name="_csrf"]').value : ''}`
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        const container = e.target.closest('.quantity-controls');
+                        const display = container.querySelector('.quantity-display');
+                        display.textContent = result.quantity;
+                        updateCartCount(result.cartCount);
+                        if (result.quantity === 0) {
+                            container.outerHTML = `
+                                <form class="add-to-cart-form" data-product-id="${productId}">
+                                    <input type="hidden" name="productId" value="${productId}">
+                                    <button type="submit" class="cart-btn">Добавить в корзину</button>
+                                    ${document.querySelector('input[name="_csrf"]') ? '<input type="hidden" name="_csrf" value="' + document.querySelector('input[name="_csrf"]').value + '">' : ''}
+                                </form>`;
+                        }
+                    } else {
+                        alert(result.message || 'Ошибка при обновлении количества');
+                    }
+                } catch (error) {
+                    console.error('Error updating quantity:', error);
+                    alert('Произошла ошибка');
+                }
+            }
+        });
+
+        function updateCartCount(count) {
+            document.querySelector('.cart-count').textContent = count;
+        }
+    });
+</script>
+</body>
+</html>

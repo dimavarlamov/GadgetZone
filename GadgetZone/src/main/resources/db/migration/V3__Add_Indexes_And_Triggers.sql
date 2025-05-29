@@ -1,8 +1,3 @@
--- Добавляем составные индексы
-CREATE INDEX idx_orders_user_status ON orders(user_id, status);
-CREATE INDEX idx_products_category ON products(category_id);
-
--- Триггер для обновления баланса при создании заказа
 DELIMITER $$
 CREATE TRIGGER after_order_insert
 AFTER INSERT ON orders

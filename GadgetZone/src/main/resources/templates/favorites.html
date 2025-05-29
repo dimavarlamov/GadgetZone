@@ -1,34 +1,152 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Избранное</title>
-  <link rel="stylesheet" href="/static/styles.css"> <!-- если есть CSS -->
+  <title>Избранное - GadgetZone</title>
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .favorites-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    h1 {
+        color: var(--primary-color);
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .favorites-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1rem;
+        text-align: center;
+        transition: transform 0.3s;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-image {
+        max-width: 100%;
+        height: 150px;
+        object-fit: contain;
+        margin-bottom: 1rem;
+    }
+
+    .product-name {
+        font-size: 1.2rem;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .product-price {
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .action-btn {
+        padding: 0.8rem 1.5rem;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s;
+    }
+
+    .remove-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+    }
+
+    .remove-btn:hover {
+        background-color: #c82333;
+    }
+
+    .empty-message {
+        text-align: center;
+        color: #666;
+        font-size: 1.2rem;
+        margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+        .favorites-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+
+        .product-card {
+            padding: 0.8rem;
+        }
+
+        .product-image {
+            height: 120px;
+        }
+    }
+  </style>
 </head>
 <body>
+<header class="header">
+  <nav class="nav">
+    <a href="/" class="logo">
+      <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img">
+    </a>
+    <div class="nav-search">
+      <form th:action="@{/}" method="get" class="search-form">
+        <input type="text" name="search" placeholder="Поиск товаров..." class="search-input">
+        <button type="submit" class="search-button">Найти</button>
+      </form>
+    </div>
+    <ul class="nav-menu">
+      <li><a href="/profile" class="nav-link">Профиль</a></li>
+      <li><a href="/orders" class="nav-link">Заказы</a></li>
+      <li><a href="/favorites" class="nav-link active">Избранное</a></li>
+      <li>
+        <a href="/cart" class="nav-link cart-link">
+          Корзина
+          <span class="cart-count" th:text="${cartCount ?: 0}">0</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
 
-<!-- Вставка уведомлений -->
-<div th:replace="fragments/messages :: *"></div>
+<main>
+  <div class="favorites-container">
+    <h1>Ваше избранное</h1>
 
-<h2>Мои избранные товары</h2>
+    <div th:if="${favorites.isEmpty()}" class="empty-message">
+      У вас пока нет избранных товаров
+    </div>
 
-<div class="favorites-list">
-  <div th:if="${favorites.isEmpty()}">
-    <p>У вас пока нет избранных товаров.</p>
+    <div th:unless="${favorites.isEmpty()}" class="favorites-grid">
+      <div th:each="product : ${favorites}" class="product-card">
+        <a th:href="@{/products/details/{id}(id=${product.id})}">
+          <img th:src="@{${product.imageUrl}}" class="product-image" th:alt="${product.name}">
+        </a>
+        <div class="product-name" th:text="${product.name}"></div>
+        <div class="product-price" th:text="${product.price} + ' ₽'"></div>
+        <form th:action="@{/favorites/toggle}" method="post">
+          <input type="hidden" name="productId" th:value="${product.id}">
+          <button type="submit" class="action-btn remove-btn">Убрать из избранного</button>
+          <th:block th:if="${_csrf != null}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          </th:block>
+        </form>
+      </div>
+    </div>
   </div>
-
-  <div th:each="product : ${favorites}" class="product-card">
-    <h3 th:text="${product.name}">Название</h3>
-    <p th:text="${product.description}">Описание</p>
-    <p>Цена: <span th:text="${product.price}">0</span> руб.</p>
-
-    <form th:action="@{/favorites/toggle}" method="post">
-      <input type="hidden" name="productId" th:value="${product.id}" />
-      <button type="submit">Удалить из избранного</button>
-    </form>
-  </div>
-</div>
-
-<a href="/products">← Назад к товарам</a>
+</main>
 </body>
 </html>

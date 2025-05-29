@@ -116,6 +116,33 @@ public class OrderRepository {
         String sql = "SELECT * FROM order_items WHERE order_id = ?";
         return jdbc.query(sql, new OrderItemRowMapper(productRepository), orderId);
     }
+
+    public List<Order> findBySellerId(Long sellerId) {
+        String sql = """
+        SELECT DISTINCT o.* FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        JOIN products p ON oi.product_id = p.id
+        WHERE p.seller_id = ?
+        """;
+        List<Order> orders = jdbc.query(sql, new OrderRowMapper(), sellerId);
+        orders.forEach(order -> order.setItems(getOrderItems(order.getId())));
+        return orders;
+    }
+
+
+    public Optional<Order> findById(Long id) {
+        String sql = "SELECT * FROM orders WHERE id = ?";
+        try {
+            Order order = jdbc.queryForObject(sql, new OrderRowMapper(), id);
+            if (order != null) {
+                order.setItems(getOrderItems(order.getId()));
+            }
+            return Optional.ofNullable(order);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
 }
 
 // Маппер для элементов заказа

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Информация о товаре</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<a href="/" class="top-left-button">← На главную</a>
+
+<div class="product-details">
+    <img th:src="@{${product.imageUrl}}" alt="Изображение товара">
+    <h1 th:text="${product.name}"></h1>
+    <p class="price" th:text="'Цена: ' + ${product.price} + ' ₽'"></p>
+    <p class="stock" th:text="'Остаток: ' + ${product.stock}"></p>
+    <p class="description" th:text="${product.description}"></p>
+</div>
+
+<div class="reviews">
+    <h2>Отзывы</h2>
+    <div th:each="review : ${reviews}" class="review">
+        <div class="rating" th:text="'Оценка: ' + ${review.rating}"></div>
+        <p th:text="${review.comment}"></p>
+        <small th:text="${review.createdAt}"></small>
+    </div>
+</div>
+
+<!-- Форма для добавления отзыва -->
+<div th:if="${user != null}">
+    <form th:action="@{/reviews/{productId}(productId=${product.id})}" method="post">
+        <select name="rating" required>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+        </select>
+        <textarea name="comment" placeholder="Ваш отзыв"></textarea>
+        <button type="submit">Отправить отзыв</button>
+    </form>
+</div>
+</body>
+</html>
