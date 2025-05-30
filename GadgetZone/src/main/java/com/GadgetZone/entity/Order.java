@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -44,4 +46,14 @@ public class Order {
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @Transient
+    private Date orderDateAsDate;
+
+    public Date getOrderDateAsDate() {
+        if (orderDate != null) {
+            return Date.from(orderDate.atZone(ZoneId.systemDefault()).toInstant());
+        }
+        return null;
+    }
 }

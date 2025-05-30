@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Детали заказа</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<a th:href="@{/seller/orders}" class="top-left-button">← Назад к заказам</a>
+<h1>Детали заказа #<span th:text="${order.id}"></span></h1>
+
+<div th:if="${error}" class="error-message" th:text="${error}"></div>
+<div th:if="${success}" class="success-message" th:text="${success}"></div>
+
+<div class="order-details">
+    <p><strong>Дата:</strong> <span th:text="${order.orderDateAsDate != null} ? ${#dates.format(order.orderDateAsDate, 'dd/MM/yyyy HH:mm')} : 'Нет даты'"></span></p>
+    <p><strong>Статус:</strong> <span th:text="${order.status}"></span></p>
+    <p><strong>Сумма:</strong> <span th:text="${order.totalAmount} + ' ₽'"></span></p>
+    <p><strong>Адрес доставки:</strong> <span th:text="${order.deliveryAddress}"></span></p>
+    <p><strong>Телефон:</strong> <span th:text="${order.phoneNumber}"></span></p>
+
+    <h2>Товары в заказе</h2>
+    <table class="manage-table">
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Количество</th>
+            <th>Цена за единицу</th>
+            <th>Общая стоимость</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${order.items}">
+            <td th:text="${item.product.name}"></td>
+            <td th:text="${item.quantity}"></td>
+            <td th:text="${item.product.price} + ' ₽'"></td>
+            <td th:text="${item.product.price * item.quantity} + ' ₽'"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Изменить статус заказа</h2>
+    <form th:action="@{/seller/orders/{id}/status(id=${order.id})}" method="post">
+        <label for="status">Новый статус:</label>
+        <select name="status" id="status">
+            <option th:each="status : ${statuses}"
+                    th:value="${status}"
+                    th:text="${status}"
+                    th:selected="${order.status == status}"></option>
+        </select>
+        <button type="submit" class="btn">Обновить статус</button>
+    </form>
+</div>
+</body>
+</html>

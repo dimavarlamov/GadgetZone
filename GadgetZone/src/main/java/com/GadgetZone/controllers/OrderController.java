@@ -20,6 +20,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -103,20 +106,18 @@ public class OrderController {
     public String viewSellerOrders(Authentication authentication, Model model) {
         String email = authentication.getName();
         User user = userService.getUserByEmail(email);
+        logger.info("Loading orders for seller with email: {}", email);
 
         List<Order> orders = orderService.getOrdersBySeller(user.getId());
+        orders.forEach(order -> {
+            if (order.getOrderDate() != null) {
+                order.setOrderDateAsDate(order.getOrderDateAsDate());
+            }
+        });
+
+        logger.info("Found {} orders for sellerId: {}", orders.size(), user.getId());
         model.addAttribute("orders", orders);
         return "manage-orders";
-    }
-
-    // Обновление статуса заказа
-    @PostMapping("/seller/orders/{id}/status")
-    public String updateOrderStatus(@PathVariable Long id,
-                                    @RequestParam OrderStatus status,
-                                    RedirectAttributes attributes) {
-        orderService.updateOrderStatus(id, status);
-        attributes.addFlashAttribute("success", "Статус заказа обновлён");
-        return "redirect:/seller/orders/" + id;
     }
 
     // Просмотр заказов покупателя
@@ -146,4 +147,76 @@ public class OrderController {
         }
         return userService.getUserByEmail(authentication.getName());
     }
+
+    @GetMapping("/seller/orders/{id}")
+    public String sellerOrderDetails(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("error", "Требуется авторизация");
+            return "redirect:/login";
+        }
+
+        String email = authentication.getName();
+        User user = userService.getUserByEmail(email);
+        logger.info("Loading order details for orderId: {} and sellerId: {}", id, user.getId());
+
+        Order order = orderService.getOrderById(id);
+        if (order == null) {
+            logger.error("Order not found for orderId: {}", id);
+            redirectAttributes.addFlashAttribute("error", "Заказ не найден");
+            return "redirect:/seller/orders";
+        }
+
+        boolean hasSellerProducts = order.getItems().stream()
+                .anyMatch(item -> item.getProduct().getSellerId().equals(user.getId()));
+        if (!hasSellerProducts) {
+            logger.error("Seller {} does not have access to order {}", user.getId(), id);
+            redirectAttributes.addFlashAttribute("error", "У вас нет доступа к этому заказу");
+            return "redirect:/seller/orders";
+        }
+
+        model.addAttribute("order", order);
+        model.addAttribute("statuses", OrderStatus.values()); // Для формы изменения статуса
+        logger.info("Order details loaded for orderId: {}", id);
+        return "seller-order-details";
+    }
+
+    @PostMapping("/seller/orders/{id}/status")
+    public String updateOrderStatus(@PathVariable Long id, @RequestParam("status") OrderStatus status,
+                                    Authentication authentication, RedirectAttributes redirectAttributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("error", "Требуется авторизация");
+            return "redirect:/login";
+        }
+
+        String email = authentication.getName();
+        User user = userService.getUserByEmail(email);
+        logger.info("Updating status for orderId: {} to status: {} by sellerId: {}", id, status, user.getId());
+
+        Order order = orderService.getOrderById(id);
+        if (order == null) {
+            logger.error("Order not found for orderId: {}", id);
+            redirectAttributes.addFlashAttribute("error", "Заказ не найден");
+            return "redirect:/seller/orders";
+        }
+
+        boolean hasSellerProducts = order.getItems().stream()
+                .anyMatch(item -> item.getProduct().getSellerId().equals(user.getId()));
+        if (!hasSellerProducts) {
+            logger.error("Seller {} does not have access to order {}", user.getId(), id);
+            redirectAttributes.addFlashAttribute("error", "У вас нет доступа к этому заказу");
+            return "redirect:/seller/orders";
+        }
+
+        try {
+            orderService.updateOrderStatus(id, status);
+            redirectAttributes.addFlashAttribute("success", "Статус заказа успешно обновлён на " + status);
+            logger.info("Order status updated for orderId: {} to {}", id, status);
+        } catch (Exception e) {
+            logger.error("Failed to update order status for orderId: {}", id, e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при обновлении статуса заказа");
+        }
+
+        return "redirect:/seller/orders/" + id;
+    }
+
 }

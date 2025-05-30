@@ -149,11 +149,19 @@ public class OrderService {
         return orderRepository.findBySellerId(sellerId);
     }
 
+    public Order getOrderById(Long orderId) {
+        logger.info("Fetching order with id: {}", orderId);
+        return orderRepository.findById(orderId)
+                .orElse(null);
+    }
+
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus status) {
+        logger.info("Updating order status for orderId: {} to {}", orderId, status);
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ProductNotFoundException("Order not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + orderId));
         order.setStatus(status);
         orderRepository.update(order);
+        logger.info("Order status updated successfully for orderId: {}", orderId);
     }
 }
