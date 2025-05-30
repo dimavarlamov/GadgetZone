@@ -24,12 +24,11 @@ public class CartItem {
     @Column
     private Integer quantity;
 
-    // Конструктор для Cart
     public CartItem(Product product, int quantity) {
         this.productId = product.getId();
         this.quantity = quantity;
     }
 
-    @Transient // Это поле не сохраняется в БД, а заполняется в сервисах
+    @Transient
     private Product product;
 }

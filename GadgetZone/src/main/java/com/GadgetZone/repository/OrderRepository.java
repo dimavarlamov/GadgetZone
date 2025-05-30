@@ -1,15 +1,14 @@
 package com.GadgetZone.repository;
 
-import com.GadgetZone.entity.Order;
-import com.GadgetZone.entity.OrderItem;
-import com.GadgetZone.entity.OrderStatus;
-import com.GadgetZone.entity.Product;
+import com.GadgetZone.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,10 +20,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderRepository {
 
+    private static final Logger logger = LoggerFactory.getLogger(OrderRepository.class);
     private final JdbcTemplate jdbc;
     private final ProductRepository productRepository;
 
-    // Маппер для заказов
     private static class OrderRowMapper implements RowMapper<Order> {
         @Override
         public Order mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -33,41 +32,57 @@ public class OrderRepository {
             order.setTotalAmount(rs.getBigDecimal("total_amount"));
             order.setStatus(OrderStatus.valueOf(rs.getString("status")));
             order.setDeliveryAddress(rs.getString("delivery_address"));
+            order.setPhoneNumber(rs.getString("phone_number"));
             order.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
             return order;
         }
     }
 
-    // Сохранение заказа в базу данных
     @Transactional
-    public Order save(Order order) {
-        String sql = "INSERT INTO orders (user_id, total_amount, status, delivery_address, order_date) " +
-                "VALUES (?, ?, ?, ?, ?)";
+    public Order save(Order order, List<CartItem> cartItems) {
+        String sql = "INSERT INTO orders (user_id, total_amount, status, delivery_address, order_date, phone_number) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
         jdbc.update(sql,
                 order.getUser().getId(),
                 order.getTotalAmount(),
                 order.getStatus().name(),
                 order.getDeliveryAddress(),
-                order.getOrderDate());
+                order.getOrderDate(),
+                order.getPhoneNumber());
 
         Long id = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+        if (id == null) {
+            throw new RuntimeException("Failed to retrieve order ID");
+        }
+        logger.info("Saved order with id={}", id);
         order.setId(id);
-        saveOrderItems(order);
+        if (cartItems != null && !cartItems.isEmpty()) {
+            saveOrderItems(id, cartItems);
+        }
         return order;
     }
 
-    // Сохранение элементов заказа (связь с продуктами)
-    private void saveOrderItems(Order order) {
-        String sql = "INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?)";
-        order.getItems().forEach(item -> {
-            jdbc.update(sql,
-                    order.getId(),
-                    item.getProduct().getId(),
-                    item.getQuantity());
+    @Transactional
+    public void update(Order order) {
+        String sql = "UPDATE orders SET status = ?, total_amount = ?, delivery_address = ?, phone_number = ? WHERE id = ?";
+        jdbc.update(sql,
+                order.getStatus().name(),
+                order.getTotalAmount(),
+                order.getDeliveryAddress(),
+                order.getPhoneNumber(),
+                order.getId());
+        logger.info("Updated order with id={}", order.getId());
+    }
+
+    private void saveOrderItems(Long orderId, List<CartItem> items) {
+        String sql = "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
+        items.forEach(item -> {
+            Product product = productRepository.findById(item.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found: " + item.getProductId()));
+            jdbc.update(sql, orderId, item.getProductId(), item.getQuantity(), product.getPrice());
         });
     }
 
-    // Получение заказа по ID и userId
     public Optional<Order> findByIdAndUserId(Long orderId, Long userId) {
         String sql = "SELECT * FROM orders WHERE id = ? AND user_id = ?";
         try {
@@ -77,14 +92,12 @@ public class OrderRepository {
         }
     }
 
-    // Проверка: есть ли заказ с таким productId для любого пользователя
     public boolean existsByProductId(Long productId) {
         String sql = "SELECT COUNT(*) FROM order_items WHERE product_id = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, productId);
         return count != null && count > 0;
     }
 
-    // Проверка: есть ли заказ с данным товаром у конкретного пользователя
     public boolean existsByUserAndProduct(Long userId, Long productId) {
         String sql = """
             SELECT COUNT(*) FROM order_items oi
@@ -95,7 +108,6 @@ public class OrderRepository {
         return count != null && count > 0;
     }
 
-    // Получение всех заказов пользователя
     public List<Order> findByUserId(Long userId) {
         String sql = "SELECT * FROM orders WHERE user_id = ?";
         List<Order> orders = jdbc.query(sql, new OrderRowMapper(), userId);
@@ -103,7 +115,6 @@ public class OrderRepository {
         return orders;
     }
 
-    // Получение всех заказов в промежутке дат
     public List<Order> findByOrderDateBetween(LocalDateTime start, LocalDateTime end) {
         String sql = "SELECT * FROM orders WHERE order_date BETWEEN ? AND ?";
         List<Order> orders = jdbc.query(sql, new OrderRowMapper(), start, end);
@@ -111,7 +122,6 @@ public class OrderRepository {
         return orders;
     }
 
-    // Получение всех товаров для заказа по orderId
     private List<OrderItem> getOrderItems(Long orderId) {
         String sql = "SELECT * FROM order_items WHERE order_id = ?";
         return jdbc.query(sql, new OrderItemRowMapper(productRepository), orderId);
@@ -129,7 +139,6 @@ public class OrderRepository {
         return orders;
     }
 
-
     public Optional<Order> findById(Long id) {
         String sql = "SELECT * FROM orders WHERE id = ?";
         try {
@@ -142,10 +151,8 @@ public class OrderRepository {
             return Optional.empty();
         }
     }
-
 }
 
-// Маппер для элементов заказа
 class OrderItemRowMapper implements RowMapper<OrderItem> {
     private final ProductRepository productRepository;
 

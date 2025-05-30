@@ -32,11 +32,16 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
 
     private BigDecimal totalAmount;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private OrderStatus status = OrderStatus.NEW;
 
     @Builder.Default
     private LocalDateTime orderDate = LocalDateTime.now();
+
     private String deliveryAddress;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
 }

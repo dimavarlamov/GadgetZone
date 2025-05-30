@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrfToken}"/>
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
     <title>GadgetZone - Главная</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.1/css/all.min.css"/>
     <style>
         .filter-container { position: relative; margin-left: 1rem; }
-        .filter-button { padding: 0.8rem 1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1rem; transition: background-color 0.3s; }
+        .filter-button { padding: 0.8rem 1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1rem; }
         .filter-button:hover { background-color: var(--secondary-color); }
-        .filter-form { display: none; position: absolute; top: 100%; left: 0; background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--box-shadow); z-index: 1000; min-width: 250px; }
+        .filter-form { display: none; position: absolute; top: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--box-shadow); z-index: 1000; min-width: 250px; }
         .filter-form.active { display: block; }
         .filter-form label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-color); }
         .filter-form select, .filter-form input[type="number"] { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: var(--border-radius); font-size: 1rem; }
@@ -50,11 +50,11 @@
 <header class="header">
     <nav class="nav">
         <a href="/" class="logo">
-            <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img">
+            <img th:src="@{/images/logo.jpg}" alt="Логотип GadgetZone" class="logo-img"/>
         </a>
         <div class="nav-search">
             <form th:action="@{/}" method="get" class="search-form">
-                <input type="text" name="search" th:value="${searchQuery}" placeholder="Поиск товаров..." class="search-input">
+                <input type="text" name="search" th:value="${searchQuery}" placeholder="Поиск товаров..." class="search-input"/>
                 <button type="submit" class="cart-btn">Найти</button>
             </form>
             <div class="filter-container">
@@ -69,9 +69,9 @@
                                 th:selected="${category.title == param.category}"></option>
                     </select>
                     <label for="minPrice">Минимальная цена:</label>
-                    <input type="number" name="minPrice" id="minPrice" min="0" th:value="${param.minPrice}">
+                    <input type="number" name="minPrice" id="minPrice" min="0" th:value="${param.minPrice}"/>
                     <label for="maxPrice">Максимальная цена:</label>
-                    <input type="number" name="maxPrice" id="maxPrice" min="0" th:value="${param.maxPrice}">
+                    <input type="number" name="maxPrice" id="maxPrice" min="0" th:value="${param.maxPrice}"/>
                     <div class="button-group">
                         <button type="submit" class="apply-btn">Применить</button>
                         <button type="button" class="reset-btn" onclick="window.location.href='/'">Сбросить</button>
@@ -86,7 +86,7 @@
             <li>
                 <a href="/cart" class="nav-link cart-link">
                     Корзина
-                    <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}"></span>
+                    <span class="cart-count" th:text="${cartCount ?: 0}"></span>
                 </a>
             </li>
         </ul>
@@ -96,28 +96,28 @@
     <div class="product-grid">
         <div th:each="product : ${products}" class="product-card">
             <a th:href="@{/products/details/{id}(id=${product.id})}">
-                <img th:src="@{${product.imageUrl}}" class="product-image" th:alt="${product.name}">
+                <img th:src="@{${product.imageUrl}}" class="product-image" th:alt="${product.name}"/>
                 <h3 th:text="${product.name}"></h3>
-                <p class="price" th:text="${product.price + ' ₽'}"></p>
+                <p th:text="${product.price + ' ₽'}"></p>
             </a>
             <form th:action="@{/favorites/toggle}" method="post">
-                <input type="hidden" name="productId" th:value="${product.id}">
+                <input type="hidden" name="productId" th:value="${product.id}"/>
                 <button type="submit" class="favorite-btn"
                         th:classappend="${favoriteStatus.get(product.id) ? 'active' : ''}">
                     <i class="fas fa-heart"></i>
                 </button>
             </form>
             <div class="cart-controls">
-                <div th:if="${cartQuantities != null and cartQuantities.get(product.id) != null}">
+                <div th:if="${cartQuantities.get(product.id) != null}">
                     <div class="quantity-controls">
-                        <button class="quantity-btn decrease" th:data-product-id="${product.id}">-</button>
+                        <button class="quantity-btn decrease" th:if="${cartItems != null}" th:attr="data-cart-item-id=${cartItems.^[productId == product.id]?.id}">-</button>
                         <span class="quantity-display" th:text="${cartQuantities.get(product.id)}"></span>
-                        <button class="quantity-btn increase" th:data-product-id="${product.id}">+</button>
+                        <button class="quantity-btn increase" th:if="${cartItems != null}" th:attr="data-cart-item-id=${cartItems.^[productId == product.id]?.id}">+</button>
                     </div>
                 </div>
-                <div th:unless="${cartQuantities != null and cartQuantities.get(product.id) != null}">
-                    <form class="add-to-cart-form" th:data-product-id="${product.id}">
-                        <input type="hidden" name="productId" th:value="${product.id}">
+                <div th:unless="${cartQuantities.get(product.id) != null}">
+                    <form class="add-to-cart-form" th:attr="data-product-id=${product.id}">
+                        <input type="hidden" name="productId" th:value="${product.id}"/>
                         <button type="submit" class="cart-btn">Добавить в корзину</button>
                         <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     </form>
@@ -130,8 +130,8 @@
     </div>
     <div class="pagination" th:if="${totalPages > 1}">
         <a th:each="i : ${#numbers.sequence(1, totalPages)}"
-           th:href="@{/(page=${i-1},search=${searchQuery},category=${category},minPrice=${minPrice},maxPrice=${maxPrice})}"
-           th:class="${currentPage == i} ? 'active'"
+           th:href="@{/(page=${i-1},search=${searchQuery},category=${param.category},minPrice=${param.minPrice},maxPrice=${param.maxPrice})}"
+           th:class="${currentPage == i-1} ? 'active'"
            th:text="${i}"></a>
     </div>
 </main>
@@ -140,21 +140,19 @@
         const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
-        // Toggle filter form
-        document.querySelector('.filter-button').addEventListener('click', (e) => {
+        document.querySelector('.filter-button')?.addEventListener('click', (e) => {
             e.stopPropagation();
             document.querySelector('.filter-form').classList.toggle('active');
         });
 
-        document.addEventListener('click', (event) => {
+        document.addEventListener('click', (e) => {
             const filterContainer = document.querySelector('.filter-container');
-            if (!filterContainer.contains(event.target)) {
+            if (!filterContainer.contains(e.target)) {
                 document.querySelector('.filter-form').classList.remove('active');
             }
         });
 
-        // Validate filter form
-        document.getElementById('filter-form').addEventListener('submit', (e) => {
+        document.getElementById('filter-form')?.addEventListener('submit', (e) => {
             const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
             if (minPrice > maxPrice) {
@@ -163,7 +161,6 @@
             }
         });
 
-        // Add to cart
         document.querySelectorAll('.add-to-cart-form').forEach(form => {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -199,7 +196,6 @@
             });
         });
 
-        // Update quantity
         document.addEventListener('click', async (e) => {
             if (e.target.classList.contains('quantity-btn')) {
                 e.preventDefault();

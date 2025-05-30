@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,16 +54,17 @@ public class MainController {
             total = productService.countSearchResults(search);
         }
 
-        // Инициализируем cartQuantities и cartCount
+        // Инициализируем cartQuantities, cartCount и favoriteStatus
         Map<Long, Integer> cartQuantities = new HashMap<>();
         int cartCount = 0;
         Map<Long, Boolean> favoriteStatus = new HashMap<>();
+        List<CartItem> cartItems = new ArrayList<>(); // Пустой список по умолчанию
 
         // Если пользователь авторизован, загружаем корзину и избранное
         if (authentication != null && authentication.isAuthenticated()) {
             User user = userService.getUserByEmail(authentication.getName());
             Long userId = user.getId();
-            List<CartItem> cartItems = cartService.getCartItems(userId);
+            cartItems = cartService.getCartItems(userId);
             for (CartItem item : cartItems) {
                 cartQuantities.put(item.getProductId(), item.getQuantity());
             }
@@ -75,6 +77,7 @@ public class MainController {
 
         // Добавляем атрибуты в модель
         model.addAttribute("products", products);
+        model.addAttribute("cartItems", cartItems); // Добавляем cartItems в модель
         model.addAttribute("cartQuantities", cartQuantities);
         model.addAttribute("cartCount", cartCount);
         model.addAttribute("favoriteStatus", favoriteStatus);
@@ -82,7 +85,7 @@ public class MainController {
         model.addAttribute("category", category);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
-                model.addAttribute("currentPage", page + 1);
+        model.addAttribute("currentPage", page + 1);
         model.addAttribute("totalPages", (int) Math.ceil((double) total / pageSize));
 
         return "index";

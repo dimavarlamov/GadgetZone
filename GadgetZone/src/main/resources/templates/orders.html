@@ -4,14 +4,21 @@
     <meta charset="UTF-8">
     <title>Мои заказы - GadgetZone</title>
     <link th:href="@{/css/style.css}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.1/css/all.min.css">
     <style>
         .orders-container { max-width: 1200px; margin: 2rem auto; padding: 2rem; }
         h1 { color: var(--primary-color); text-align: center; margin-bottom: 2rem; }
-        .orders-table { width: 100%; border-collapse: collapse; }
+        .orders-table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
         .orders-table th, .orders-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
         .orders-table th { background-color: #f0f0f0; }
+        .order-details { display: none; padding: 1rem; background: #f8f8f8; border-radius: var(--border-radius); margin-top: 1rem; }
+        .order-details.active { display: block; }
+        .order-item { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #ddd; }
+        .order-item img { width: 60px; height: 60px; object-fit: contain; }
+        .order-item-details { flex: 1; margin-left: 1rem; }
+        .total { font-size: 1.2rem; font-weight: bold; text-align: right; margin: 1rem 0; }
         .empty-message { text-align: center; color: #666; font-size: 1.2rem; margin: 2rem 0; }
+        .details-btn { cursor: pointer; color: var(--primary-color); text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -52,20 +59,47 @@
                 <th>Дата</th>
                 <th>Сумма</th>
                 <th>Статус</th>
-                <th>Детали</th>
+                <th>Действия</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="order : ${orders}">
                 <td th:text="${order.id}"></td>
-                <td th:text="${#temporals.format(order.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
-                <td th:text="${order.total + ' ₽'}"></td>
+                <td th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}"></td>
+                <td th:text="${order.totalAmount + ' ₽'}"></td>
                 <td th:text="${order.status}"></td>
-                <td><a th:href="@{/orders/{id}(id=${order.id})}">Посмотреть</a></td>
+                <td><span class="details-btn" th:attr="data-order-id=${order.id}">Посмотреть детали</span></td>
             </tr>
             </tbody>
         </table>
+        <div th:each="order : ${orders}" class="order-details" th:id="'order-' + ${order.id}">
+            <h2>Детали заказа #<span th:text="${order.id}"></span></h2>
+            <p><strong>Дата и время доставки:</strong> <span th:text="${#temporals.format(order.orderDate.plusDays(3), 'dd.MM.yyyy HH:mm')}"></span></p>
+            <p><strong>Адрес доставки:</strong> <span th:text="${order.deliveryAddress}"></span></p>
+            <p><strong>Номер телефона:</strong> <span th:text="${order.phoneNumber}"></span></p>
+            <h3>Товары</h3>
+            <div th:each="item : ${order.items}" class="order-item">
+                <img th:src="@{${item.product.imageUrl}}" th:alt="${item.product.name}">
+                <div class="order-item-details">
+                    <p th:text="${item.product.name}"></p>
+                    <p th:text="${'Количество: ' + item.quantity}"></p>
+                    <p th:text="${'Цена: ' + (item.product.price * item.quantity) + ' ₽'}"></p>
+                </div>
+            </div>
+            <div class="total" th:text="${'Итого: ' + order.totalAmount + ' ₽'}"></div>
+        </div>
     </div>
 </main>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.details-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const orderId = btn.getAttribute('data-order-id');
+                const detailsDiv = document.getElementById(`order-${orderId}`);
+                detailsDiv.classList.toggle('active');
+            });
+        });
+    });
+</script>
 </body>
 </html>

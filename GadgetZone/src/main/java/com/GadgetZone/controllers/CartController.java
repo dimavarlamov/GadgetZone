@@ -3,6 +3,7 @@ package com.GadgetZone.controllers;
 import com.GadgetZone.entity.CartItem;
 import com.GadgetZone.entity.Order;
 import com.GadgetZone.entity.User;
+import com.GadgetZone.exceptions.InsufficientFundsException;
 import com.GadgetZone.exceptions.InsufficientStockException;
 import com.GadgetZone.service.CartService;
 import com.GadgetZone.service.FavoriteService;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +35,7 @@ public class CartController {
     private final CartService cartService;
     private final FavoriteService favoriteService;
     private final OrderService orderService;
-    private final UserService userService; // Added missing dependency
+    private final UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(CartController.class);
 
     @PostMapping("/add")
@@ -139,7 +141,7 @@ public class CartController {
             response.put("message", "Ошибка при обновлении количества");
             return ResponseEntity.status(500).body(response);
         }
-    } // Added missing closing brace
+    }
 
     @GetMapping
     public String viewCart(Authentication authentication, Model model, RedirectAttributes attributes) {
@@ -166,7 +168,7 @@ public class CartController {
 
     @PostMapping("/checkout")
     public String checkoutForm(@RequestParam List<Long> selectedIds, Authentication authentication, Model model, RedirectAttributes attributes) {
-        if (authentication == null || !authentication.isAuthenticated()) { // Fixed authentication check
+        if (authentication == null || !authentication.isAuthenticated()) {
             attributes.addFlashAttribute("error", "Требуется авторизация");
             return "redirect:/login";
         }
@@ -194,29 +196,51 @@ public class CartController {
     }
 
     @PostMapping("/order/place")
-    public String confirmOrder(
-            @RequestParam List<Long> selectedItems,
-            @RequestParam String deliveryAddress,
-            Authentication authentication,
-            RedirectAttributes attributes) {
+    public String placeOrder(@RequestParam("selectedItems") List<Long> selectedItemIds,
+                             @RequestParam("deliveryAddress") String deliveryAddress,
+                             @RequestParam("phoneNumber") String phoneNumber,
+                             RedirectAttributes attributes,
+                             Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             attributes.addFlashAttribute("error", "Требуется авторизация");
             return "redirect:/login";
         }
-
+        User user = getAuthenticatedUser(authentication);
         try {
-            User user = getAuthenticatedUser(authentication);
-            List<CartItem> items = cartService.getSelectedItems(user.getId(), selectedItems);
-            if (items.isEmpty()) {
-                throw new Exception("Выберите хотя бы один товар");
+
+
+            List<CartItem> selectedItems = cartService.getSelectedItems(user.getId(), selectedItemIds);
+
+            // Проверяем, что есть элементы
+            if (selectedItems.isEmpty()) {
+                attributes.addFlashAttribute("error", "Выберите хотя бы один товар");
+                return "redirect:/cart";
             }
-            Order order = orderService.createOrder(user.getId(), items, deliveryAddress);
-            attributes.addFlashAttribute("success", "Заказ успешно оформлен");
-            logger.info("Order confirmed: {} for userId={}", order.getId(), user.getId());
-            return "redirect:/orders/" + order.getId();
-        } catch (Exception e) {
-            logger.error("Error confirming order: {}", e.getMessage());
+
+            // Создаём заказ через OrderService
+            Order order = orderService.createOrder(user.getId(), selectedItems, deliveryAddress, phoneNumber);
+
+            // Очищаем корзину
+            cartService.clearCart(user.getId());
+
+            logger.info("Order created successfully: orderId={}, userId={}", order.getId(), user.getId());
+            attributes.addFlashAttribute("success", "Заказ успешно оформлен!");
+            return "redirect:/orders";
+        } catch (InsufficientFundsException e) {
+            logger.error("Insufficient funds for userId={}: {}", user.getId(), e.getMessage());
+            attributes.addFlashAttribute("error", "Недостаточно средств на балансе");
+            return "redirect:/cart";
+        } catch (InsufficientStockException e) {
+            logger.error("Insufficient stock for userId={}: {}", user.getId(), e.getMessage());
+            attributes.addFlashAttribute("error", "Недостаточно товара на складе");
+            return "redirect:/cart";
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid input for userId={}: {}", user.getId(), e.getMessage());
             attributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/cart";
+        } catch (Exception e) {
+            logger.error("Error placing order for userId={}: {}", user.getId(), e.getMessage());
+            attributes.addFlashAttribute("error", "Ошибка при оформлении заказа");
             return "redirect:/cart";
         }
     }

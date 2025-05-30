@@ -1,0 +1,1 @@
+ALTER TABLE order_items MODIFY COLUMN price DECIMAL(10,2) NULL;

@@ -153,12 +153,13 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
-    public List<CartItem> getSelectedItems(Long userId, List<Long> selectedIds) {
-        return cartRepository.findByUserId(userId).stream()
-                .filter(item -> selectedIds.contains(item.getId()))
+    public List<CartItem> getSelectedItems(Long userId, List<Long> selectedItemIds) {
+        List<CartItem> items = cartRepository.findByUserId(userId);
+        return items.stream()
+                .filter(item -> selectedItemIds.contains(item.getId())) // Фильтруем по item.id
                 .map(item -> {
                     Product product = productRepository.findById(item.getProductId())
-                            .orElseThrow(ProductNotFoundException::new);
+                            .orElseThrow(() -> new IllegalArgumentException("Product not found: " + item.getProductId()));
                     item.setProduct(product);
                     return item;
                 })

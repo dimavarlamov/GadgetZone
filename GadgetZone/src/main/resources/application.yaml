@@ -57,3 +57,6 @@ logging:
     "[com.GadgetZone]": DEBUG
     org.springframework.security.authentication: DEBUG
     com.GadgetZone.service.CustomUserDetailsService: TRACE
+    org.springframework.security: DEBUG
+    org:
+      springframework=DEBUG:
